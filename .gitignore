@@ -1,5 +1,9 @@
 # Something
-./data
+data/2021-09-29.mat
+data/2021-10-02.mat
+data/2021-10-12.mat
+data/2021-10-13.mat
+data/2022-02-04.mat
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

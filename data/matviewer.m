@@ -1,7 +1,7 @@
 num_frames = 128;
 side = 16;
 
-m = matfile('~/Downloads/data/frm_cc_00005115.mat');
+m = matfile('/Users/eremin/Documents/GitHub/PGI/data/2021-10-02.mat');
 frames = m.frames;
 figure;
 for i=1:num_frames

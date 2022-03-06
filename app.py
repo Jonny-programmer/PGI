@@ -20,9 +20,9 @@ for elem in pdm:
 
 x = list(range(0, 1000))
 
-plot = figure(title='example', x_axis_label='x', y_axis_label='y')
+plot = figure(title='Light curve', x_axis_label='Intensity', y_axis_label='Time, 10^5')
 
-plot.line(x, y, legend_label='example_legend', line_width=2)
+plot.line(x, y, legend_label='', line_width=2)
 
 script, div = components(plot)
 

@@ -6,21 +6,19 @@ from flask import Flask, render_template, url_for
 
 app = Flask(__name__)
 
-number = 0
-y = []
-file = File('static/mat/2021-09-29-d1.mat')
+file = File('static/mat/2021-10-02-d3.mat')
 
-pdm = (file.__getitem__('pdm_2d_rot_global'))
+light_curve = file['lightcurvesum_global']
+unix_time = file['unixtime_global']
+last = np.add(unix_time[-1], 5)
+unix_time = np.append(unix_time, last)
+unix_time = [np.linspace(unix_time[i], unix_time[i + 1], 128) for i in range(len(unix_time) - 1)]
 
-for elem in pdm:
-    if number == 1000:
-        break
-    number += 1
-    y.append(np.array(elem).mean())
+x = np.concatenate(unix_time)
+y = np.concatenate(light_curve)
 
-x = list(range(0, 1000))
 
-plot = figure(title='Light curve', x_axis_label='Intensity', y_axis_label='Time, 10^5')
+plot = figure(title='Light curve', x_axis_label='Intensity', y_axis_label='Time, 10^5', width=1000)
 
 plot.line(x, y, legend_label='', line_width=2)
 

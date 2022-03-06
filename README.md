@@ -12,3 +12,7 @@
 npm install node
 node ./js/files_array.js > files.html
 ```
+3) Starting the app:
+```commandline
+python3 app.py
+```

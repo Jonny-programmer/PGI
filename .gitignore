@@ -1,10 +1,6 @@
 # Something
-static/mat/2021-09-29-d1.mat
-static/mat/2021-09-29-d2.mat
-data/2021-10-02.mat
-data/2021-10-12.mat
-data/2021-10-13.mat
-data/2022-02-04.mat
+static/mat/
+data/
 
 # PYTHON FILES
 # Byte-compiled / optimized / DLL files

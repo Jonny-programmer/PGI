@@ -14,7 +14,7 @@ login.init_app(app)
 login.login_view = 'login'
 
 
-file = File('static/mat/2021-10-02-d3.mat')
+file = File('static/mat/2022-02-04-d3.mat')
 
 light_curve = file['lightcurvesum_global']
 unix_time = file['unixtime_global']

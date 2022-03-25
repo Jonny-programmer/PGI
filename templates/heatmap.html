@@ -13,6 +13,8 @@
 
 <body>
 
+<script>let c = 0</script>
+
 <div id="plotly_graph">
 </div>
 
@@ -22,12 +24,43 @@
 
 <h5 class="header">You are on the frame number {{ number }}</h5>
 <div class="btn-group" role="group" aria-label="Basic example">
-  <button type="button" class="btn btn-primary"> << </button>
-  <button type="button" class="btn btn-primary"><</button>
-  <button type="button" class="btn btn-primary">></button>
-  <button type="button" class="btn btn-primary"> >> </button>
+  <button type="button" class="btn btn-primary" onclick="ten_frames_back()"> << </button>
+  <button type="button" class="btn btn-primary" onclick="previous_frame()"> < </button>
+  <button type="button" class="btn btn-primary" onclick="next_frame()"> > </button>
+  <button type="button" class="btn btn-primary" onclick="ten_frames_ahead()"> >> </button>
 </div>
 
+<script>
+    $('.btn-group').IncrementBox({
+        timeout: 75,
+        cursor: false
+    });
+
+    function next_frame() {
+        c++;
+    };
+
+    function previous_frame() {
+        if (c > 1) {
+            c--;
+        }
+        else {c = 0}
+    };
+
+    function ten_frames_ahead() {
+        c+=10;
+        
+    };
+
+    function ten_frames_back() {
+        if (c > 10) {
+            c-=10;
+        }
+        else {
+            c=0;
+        }
+    };
+</script>
 
 </body>
 </html>

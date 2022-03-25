@@ -37,9 +37,9 @@ def heatmap(number):
     fig = Heatmap(123)
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    with open('example.json', 'w') as file:
+    with open('/Users/eremin/Documents/GitHub/PGI/static/json/example.json', 'w') as file:
         file.write(f'var graphs = {graphJSON};')
-    return render_template('heatmap.html', graphs=graphJSON, number=number)
+    return render_template('heatmap.html', number=number)
 
 
 if __name__ == "__main__":

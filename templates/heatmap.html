@@ -12,19 +12,20 @@
 </head>
 
 <body>
+
 <div id="plotly_graph">
-    <script src="../PLOTLY/example.json"></script>
 </div>
 
-<script>Plotly.plot('plotly_graph', {{ graphs }}, {});</script>
+<script src={{ url_for("static", filename="json/example.json") }}></script>
+<script>Plotly.plot('plotly_graph', graphs, {});</script>
 
 
 <h5 class="header">You are on the frame number {{ number }}</h5>
 <div class="btn-group" role="group" aria-label="Basic example">
-  <button type="button" class="btn btn-primary">'<<'</button>
-  <button type="button" class="btn btn-primary">'<'</button>
-  <button type="button" class="btn btn-primary">'>'</button>
-  <button type="button" class="btn btn-primary">'>>'</button>
+  <button type="button" class="btn btn-primary"> << </button>
+  <button type="button" class="btn btn-primary"><</button>
+  <button type="button" class="btn btn-primary">></button>
+  <button type="button" class="btn btn-primary"> >> </button>
 </div>
 
 

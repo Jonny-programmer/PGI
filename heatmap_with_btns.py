@@ -4,7 +4,7 @@ import plotly.express as px
 import numpy as np
 from h5py import File
 
-file = File('/Users/eremin/Documents/GitHub/PGI/static/mat/2022-02-04-d3.mat')
+file = File('./static/mat/2022-02-04-d3.mat')
 
 unix_time = file['unixtime_global']
 
@@ -18,14 +18,14 @@ data = file['pdm_2d_rot_global']
 def Heatmap(frame: int):
     array = data[frame]
     fig = px.imshow(array, contrast_rescaling='minmax', aspect='equal', origin='upper',)
+
     fig.update_layout(legend_orientation="h",
                       legend=dict(title=f"This is frame number {frame} out of {len(data)} <br> timestamp is {UNIX_TIME[frame]:.3f} seconds",
-                                  x=.5, xanchor='center', bordercolor='red', borderwidth=3,
-
-                                  ),
+                                  x=.5, xanchor='center', bordercolor='red', borderwidth=3,),
                       showlegend=True,
                       xaxis_title="",
-                      yaxis_title="",)
+                      yaxis_title="",
+                      )
     return fig
 
 
@@ -36,8 +36,7 @@ app = Flask(__name__, template_folder='templates')
 def heatmap(number):
     fig = Heatmap(123)
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    with open(url_for('static', filename='/json/example.json'), 'w') as file:
+    with open('/Users/eremin/Documents/GitHub/PGI/static/json/example.json', 'w') as file:
         file.write(f'var graphs = {graphJSON};')
     return render_template('heatmap.html', number=number)
 

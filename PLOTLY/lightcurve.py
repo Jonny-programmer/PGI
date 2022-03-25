@@ -3,7 +3,7 @@ import numpy as np
 import plotly.express as px
 from scipy import signal
 
-file = File('/Users/eremin/Documents/GitHub/PGI/static/mat/2021-10-02-d3.mat')
+file = File('/Users/eremin/Documents/GitHub/PGI/static/mat/2022-01-26-d3-nz.mat')
 
 light_curve = file['lightcurvesum_global']
 unix_time = file['unixtime_global']
@@ -17,8 +17,8 @@ print("Length of UNIX_TIME:", len(UNIX_TIME))
 
 y2 = np.concatenate(light_curve)
 # Downsampling
-q = 100
-UNIX_TIME_2 = signal.decimate(UNIX_TIME, ftype='fir', q=q, n=8)
+q = 320
+UNIX_TIME_2 = UNIX_TIME.reshape(-1, q)[:, 0]
 light_curve_2 = signal.decimate(y2, q=q, ftype='fir', n=8)
 
 light_curve = px.line(x=UNIX_TIME_2, y=light_curve_2)

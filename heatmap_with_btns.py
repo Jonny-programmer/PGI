@@ -34,13 +34,15 @@ app = Flask(__name__, template_folder='templates')
 
 @app.route("/<int:number>", methods=["GET", "POST"])
 def heatmap(number):
-    figure = Heatmap(number)
-    return render_template('heatmap.html',
-                           filename=figure, number=number)
+    fig = Heatmap(123)
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    with open('example.json', 'w') as file:
+        file.write(f'var graphs = {graphJSON};')
+    return render_template('heatmap.html', graphs=graphJSON, number=number)
 
 
 if __name__ == "__main__":
-    # app.run(port=8305, debug=True)
-    fig = Heatmap(123)
-    fig.show()
-    plotly.offline.plot(fig, filename=f'./145034920392030923.html', include_plotlyjs=False, output_type='div')
+    app.run(port=8305, debug=True)
+
+

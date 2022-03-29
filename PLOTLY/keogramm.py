@@ -22,3 +22,5 @@ diag_global_2 = signal.decimate(diag_global, q=q, ftype='fir')
 graph2 = px.imshow(diag_global_2, x=UNIX_TIME_2, contrast_rescaling='minmax',
                   title="Keogramm", aspect='auto')
 graph2.show()
+
+#hello man

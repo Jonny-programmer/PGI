@@ -1,66 +1,116 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<meta charset="utf-8">
-	<title>Main page</title>
-	<meta name="description" content="Data from UV telescope located in PGI observatory for the analysis of auroras">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <meta charset="utf-8">
+    <title>Main page</title>
+    <meta name="description" content="Data from UV telescope located in PGI observatory for the analysis of auroras">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link href="../static/css/graphs.css" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script>
+        function funcSucces(data) {
+            $("#text_id").html('You are on the frame number ' + window.current)
+            console.log(window.current)
+            $("#plotly_graph").remove();
+            $('<div>', {
+                id: 'plotly_graph'
+            }).appendTo("#heatmaps")
+            let graphs = JSON.parse(data);
+            console.log(graphs);
+            Plotly.plot('plotly_graph', graphs, {});
+        }
 
+        $(document).ready(function () {
+            $("#next").bind("click", function () {
+                window.current += 10;
+                $.ajax({
+                    url: "/",
+                    type: 'POST',
+                    data: ({
+                        current: window.current,
+                        pos: 'next'
+                    }),
+                    datatype: 'text',
+                    success: funcSucces
+                })
+            })
+            
+            $("#next2").bind("click", function () {
+                window.current += 1000;
+                $.ajax({
+                    url: "/",
+                    type: 'POST',
+                    data: ({
+                        current: window.current,
+                        pos: 'next2'
+                    }),
+                    datatype: 'text',
+                    success: funcSucces
+                })
+            })
+            
+            $("#last").bind("click", function () {
+                window.current -= 10;
+                $.ajax({
+                    url: "/",
+                    type: 'POST',
+                    data: ({
+                        current: window.current,
+                        pos: 'last'
+                    }),
+                    datatype: 'text',
+                    success: funcSucces
+                })
+            })
+            
+            $("#last2").bind("click", function () {
+                window.current -= 1000;
+                $.ajax({
+                    url: "/",
+                    type: 'POST',
+                    data: ({
+                        current: window.current,
+                        pos: 'last2'
+                    }),
+                    datatype: 'text',
+                    success: funcSucces
+                })
+            })
+        })
+    </script>
 </head>
 
 <body>
-
-<script>let c = 0</script>
-
-<div id="plotly_graph">
-</div>
-
-<script src={{ url_for("static", filename="json/example.json") }}></script>
-<script>Plotly.plot('plotly_graph', graphs, {});</script>
-
-
-<h5 class="header">You are on the frame number {{ number }}</h5>
-<div class="btn-group" role="group" aria-label="Basic example">
-  <button type="button" class="btn btn-primary" onclick="ten_frames_back()"> << </button>
-  <button type="button" class="btn btn-primary" onclick="previous_frame()"> < </button>
-  <button type="button" class="btn btn-primary" onclick="next_frame()"> > </button>
-  <button type="button" class="btn btn-primary" onclick="ten_frames_ahead()"> >> </button>
+<div id="heatmaps">
+    <div id="plotly_graph">
+    </div>
 </div>
 
 <script>
-    $('.btn-group').IncrementBox({
-        timeout: 75,
-        cursor: false
-    });
-
-    function next_frame() {
-        c++;
-    };
-
-    function previous_frame() {
-        if (c > 1) {
-            c--;
-        }
-        else {c = 0}
-    };
-
-    function ten_frames_ahead() {
-        c+=10;
-        
-    };
-
-    function ten_frames_back() {
-        if (c > 10) {
-            c-=10;
-        }
-        else {
-            c=0;
-        }
-    };
+    window.current = -1;
+    $(document).ready(function () {
+        $('#next').trigger('click');
+    })
 </script>
 
+
+<h5 class="header" id="text_id">You are on the frame number 0</h5>
+<div class="btn-group" role="group" aria-label="Basic example">
+    <button type="button" class="btn btn-primary" id="last2">
+        <<
+    </button>
+    <button type="button" class="btn btn-primary" id="last">
+        <
+    </button>
+    <button type="button" class="btn btn-primary" id="next"> ></button>
+    <button type="button" class="btn btn-primary" id="next2"> >></button>
+</div>
+
+
 </body>
+
 </html>

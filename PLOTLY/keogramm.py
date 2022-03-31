@@ -15,12 +15,11 @@ diag_global = file["diag_global"]
 diag_global = np.rot90(diag_global)
 print("Size of diag_global:", len(diag_global), len(diag_global[0]), "\nsize of UNIX_TIME:", len(UNIX_TIME), 1)
 
-q = 320  # То, во сколько раз вы прорежаете массив (берете каждый q-й элемент)
-UNIX_TIME_2 = UNIX_TIME.reshape(-1, q)[:, 0]
+q = 321  # То, во сколько раз вы прорежаете массив (берете каждый q-й элемент)
+a = np.zeros(q - UNIX_TIME.shape[0] + ((UNIX_TIME.shape[0] + 1) // q) * q)
+UNIX_TIME_2 = np.concatenate((UNIX_TIME, a)).reshape(-1, q)[:, 0]
 diag_global_2 = signal.decimate(diag_global, q=q, ftype='fir')
 
 graph2 = px.imshow(diag_global_2, x=UNIX_TIME_2, contrast_rescaling='minmax',
                   title="Keogramm", aspect='auto')
 graph2.show()
-
-#hello man

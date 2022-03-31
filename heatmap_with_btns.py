@@ -43,5 +43,3 @@ def heatmap(number):
 
 if __name__ == "__main__":
     app.run(port=8305, debug=True)
-
-

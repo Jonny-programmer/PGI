@@ -64,7 +64,7 @@ def heatmap():
             return result
         else:
             current = int(request.values.get('current'))
-            changes = {'next': 10, 'next2': 1000, 'last': -10, 'last2': -1000}
+            changes = {'next': 1, 'next2': 10, 'next3': 1000, 'last': -1, 'last2': -10, 'last3': -1000}
             current += changes[request.values.get('pos')]
             fig = Heatmap(current)
             graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)

@@ -28,22 +28,22 @@
         }
 
         $(document).ready(function () {
-            $("#next").bind("click", function () {
-                window.current += 10;
+            $("#next3").bind("click", function () {
+                window.current += 1000;
                 $.ajax({
                     url: "/",
                     type: 'POST',
                     data: ({
                         current: window.current,
-                        pos: 'next'
+                        pos: 'next3'
                     }),
                     datatype: 'text',
                     success: funcSucces
                 })
             })
-            
+
             $("#next2").bind("click", function () {
-                window.current += 1000;
+                window.current += 10;
                 $.ajax({
                     url: "/",
                     type: 'POST',
@@ -56,8 +56,22 @@
                 })
             })
             
+            $("#next").bind("click", function () {
+                window.current += 1;
+                $.ajax({
+                    url: "/",
+                    type: 'POST',
+                    data: ({
+                        current: window.current,
+                        pos: 'next'
+                    }),
+                    datatype: 'text',
+                    success: funcSucces
+                })
+            })
+
             $("#last").bind("click", function () {
-                window.current -= 10;
+                window.current -= 1;
                 $.ajax({
                     url: "/",
                     type: 'POST',
@@ -69,15 +83,29 @@
                     success: funcSucces
                 })
             })
-            
+
             $("#last2").bind("click", function () {
-                window.current -= 1000;
+                window.current -= 10;
                 $.ajax({
                     url: "/",
                     type: 'POST',
                     data: ({
                         current: window.current,
                         pos: 'last2'
+                    }),
+                    datatype: 'text',
+                    success: funcSucces
+                })
+            })
+            
+            $("#last3").bind("click", function () {
+                window.current -= 1000;
+                $.ajax({
+                    url: "/",
+                    type: 'POST',
+                    data: ({
+                        current: window.current,
+                        pos: 'last3'
                     }),
                     datatype: 'text',
                     success: funcSucces
@@ -123,16 +151,26 @@
 </script>
 
 <center>
-    <h5 class="header" id="text_id">You are on the frame number 0</h5>
+    <h5 class="header" id="text_id">You are on the frame number 1</h5>
     <div class="btn-group" role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-primary" id="last3">
+            <<<
+        </button>
         <button type="button" class="btn btn-primary" id="last2">
             <<
         </button>
         <button type="button" class="btn btn-primary" id="last">
             <
         </button>
-        <button type="button" class="btn btn-primary" id="next"> ></button>
-        <button type="button" class="btn btn-primary" id="next2"> >></button>
+        <button type="button" class="btn btn-primary" id="next">
+             >
+        </button>
+        <button type="button" class="btn btn-primary" id="next2">
+            >>
+        </button>
+        <button type="button" class="btn btn-primary" id="next3">
+            >>>
+        </button>
     </div>
 </center>
 {% endblock %}

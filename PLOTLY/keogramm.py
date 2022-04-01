@@ -3,8 +3,9 @@ import numpy as np
 from h5py import File
 from scipy import signal
 
-file = File('../static/mat/2022-01-26-d3-nz.mat')
 
+
+file = File('../static/mat/2022-01-26-d3-nz.mat')
 unix_time = file['unixtime_global']
 last = np.add(unix_time[-1], 5)
 unix_time = np.append(unix_time, last)

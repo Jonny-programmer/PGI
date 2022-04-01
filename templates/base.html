@@ -5,7 +5,7 @@
 	<title>Main page</title>
 	<meta name="description" content="Data from UV telescope located in PGI observatory for the analysis of auroras">
 	<link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
-	<script src="{{url_for('static', filename='js/vendor/modernizr-2.6.2.min.js')}}"></script>
+    {% block scripts %}{% endblock %}
 </head>
 
 
@@ -31,11 +31,11 @@
             Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptate a aliquid, perferendis vel ut pariatur at nemo blanditiis, in vitae facilis consectetur quis harum. Asperiores eaque itaque fuga, magnam officiis atque recusandae veritatis commodi maiores eos voluptas harum sequi rem cum quasi molestiae, delectus praesentium impedit. Sunt inventore, dolore voluptates eius aperiam, officiis officia maiores excepturi neque rem praesentium quisquam non molestiae. Mollitia corrupti rem doloremque placeat consequatur cumque alias. Perferendis vel veniam adipisci tempora nihil, facere, quo recusandae vitae voluptas maiores cum ut similique asperiores provident quia dolore, minus ea eaque. Et at doloremque modi minus sapiente, vero assumenda?
         </div>
         <div class="block">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptate a aliquid, perferendis vel ut pariatur at nemo blanditiis, in vitae facilis consectetur quis harum. Asperiores eaque itaque fuga, magnam officiis atque recusandae veritatis commodi maiores eos voluptas harum sequi rem cum quasi molestiae, delectus praesentium impedit. Sunt inventore, dolore voluptates eius aperiam, officiis officia maiores excepturi neque rem praesentium quisquam non molestiae. Mollitia corrupti rem doloremque placeat consequatur cumque alias. Perferendis vel veniam adipisci tempora nihil, facere, quo recusandae vitae voluptas maiores cum ut similique asperiores provident quia dolore, minus ea eaque. Et at doloremque modi minus sapiente, vero assumenda?
+            {% block keogramm %}{% endblock %}
         </div>
         
         <div class="block">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptate a aliquid, perferendis vel ut pariatur at nemo blanditiis, in vitae facilis consectetur quis harum. Asperiores eaque itaque fuga, magnam officiis atque recusandae veritatis commodi maiores eos voluptas harum sequi rem cum quasi molestiae, delectus praesentium impedit. Sunt inventore, dolore voluptates eius aperiam, officiis officia maiores excepturi neque rem praesentium quisquam non molestiae. Mollitia corrupti rem doloremque placeat consequatur cumque alias. Perferendis vel veniam adipisci tempora nihil, facere, quo recusandae vitae voluptas maiores cum ut similique asperiores provident quia dolore, minus ea eaque. Et at doloremque modi minus sapiente, vero assumenda?
+            {% block heatmap %}{% endblock %}
         </div>
         <div class="block">
             Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptate a aliquid, perferendis vel ut pariatur at nemo blanditiis, in vitae facilis consectetur quis harum. Asperiores eaque itaque fuga, magnam officiis atque recusandae veritatis commodi maiores eos voluptas harum sequi rem cum quasi molestiae, delectus praesentium impedit. Sunt inventore, dolore voluptates eius aperiam, officiis officia maiores excepturi neque rem praesentium quisquam non molestiae. Mollitia corrupti rem doloremque placeat consequatur cumque alias. Perferendis vel veniam adipisci tempora nihil, facere, quo recusandae vitae voluptas maiores cum ut similique asperiores provident quia dolore, minus ea eaque. Et at doloremque modi minus sapiente, vero assumenda?

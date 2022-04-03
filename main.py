@@ -16,11 +16,11 @@ UNIX_TIME = np.concatenate(unix_time)
 
 
 
-def Heatmap(frame: int):
+def Heatmap(frame: int, max_min_values: list):
     data = file['pdm_2d_rot_global']
-
     array = data[frame]
-    fig = px.imshow(array, contrast_rescaling='minmax', aspect='equal', origin='upper',)
+    print(max_min_values)
+    fig = px.imshow(array, zmax=max(max_min_values), zmin=min(max_min_values), aspect='equal', origin='upper')
 
     fig.update_layout(legend_orientation="h",
                       legend=dict(title=f"This is frame number {frame} out of {len(data)} <br> timestamp is {UNIX_TIME[frame]:.3f} seconds",
@@ -29,6 +29,7 @@ def Heatmap(frame: int):
                       xaxis_title="",
                       yaxis_title="",
                       )
+
     return fig
 
 
@@ -43,8 +44,7 @@ def Keogram():
     UNIX_TIME_2 = np.concatenate((UNIX_TIME, a)).reshape(-1, q)[:, 0]
     diag_global_2 = signal.decimate(diag_global, q=q, ftype='fir')
 
-    fig = px.imshow(diag_global_2, x=UNIX_TIME_2, contrast_rescaling='minmax',
-                      title="Keogramm", aspect='auto')
+    fig = px.imshow(diag_global_2, x=UNIX_TIME_2, contrast_rescaling='minmax', aspect='auto')
 
     fig.update_layout()
     return fig
@@ -53,20 +53,28 @@ app = Flask(__name__, template_folder='templates')
 
 
 @app.route("/", methods=["GET", "POST"])
-def heatmap():
+def main():
     if request.method == 'POST':
-        if request.values.get('first'):
-            fig1 = Heatmap(1)
+        if request.values.get('type') == 'first_event':
+            fig1 = Heatmap(1, [20000, 200000])
             fig2 = Keogram()
             heatmap_graph = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
             keogram_graph = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
             result = {'heatmap': heatmap_graph, 'keogram': keogram_graph}
             return result
-        else:
+        elif request.values.get('type') == 'heatmap_button_event':
             current = int(request.values.get('current'))
             changes = {'next': 10, 'next2': 1000, 'last': -10, 'last2': -1000}
             current += changes[request.values.get('pos')]
-            fig = Heatmap(current)
+            values = [int(request.values.get('value0')), int(request.values.get('value1'))]
+            print(values)
+            fig = Heatmap(current, values)
+            graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+            return graphJSON
+        elif request.values.get('type') == 'heatmap_slider_event':
+            current = int(request.values.get('current'))
+            values = [int(request.values.get('value0')), int(request.values.get('value1'))]
+            fig = Heatmap(current, values)
             graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
             return graphJSON
     else:

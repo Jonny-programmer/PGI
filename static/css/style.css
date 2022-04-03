@@ -1,7 +1,5 @@
 .head_image{
     width: 100%;
-    position: relative;
-    background: url(../img/head-bg.png) no-repeat center;
     height: 163px
 }
 
@@ -62,4 +60,17 @@
     position: absolute;
     left: 0;
     top: 0;
+}
+
+.something_and_slider {
+    display: grid;
+    grid-template-columns: 80% 5% 15%;
+}
+
+.ui-slider-vertical {
+    height: 450px;
+}
+
+.slider_text{
+    position: absolute;
 }

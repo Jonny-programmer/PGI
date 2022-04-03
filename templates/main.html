@@ -13,7 +13,7 @@
 <script>
 
     return_button_func = function (name){
-        let a = {'next': 10, 'next2': 1000, 'last': -10, 'last2': -1000}
+        let a = {'next': 1, 'next2': 10, 'next3': 1000, 'last': -1, 'last2': -10, 'last3': -1000}
         return function(){
             window.current += a[name]
             $.ajax({
@@ -54,13 +54,12 @@
 
     $(document).ready(function () {
         $("#next").bind("click", return_button_func('next'))
-
         $("#next2").bind("click", return_button_func('next2'))
-        })
-
+        $("#next3").bind("click", return_button_func('next3'))
         $("#last").bind("click", return_button_func('last'))
-
         $("#last2").bind("click", return_button_func('last2'))
+        $("#last3").bind("click", return_button_func('last3'))
+    })
 </script>
 
 <script>
@@ -181,6 +180,9 @@
 <center>
     <h5 class="header" id="text_id">You are on the frame number 0</h5>
     <div class="btn-group" role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-primary" id="last3">
+            <<<
+        </button>
         <button type="button" class="btn btn-primary" id="last2">
             <<
         </button>
@@ -189,6 +191,7 @@
         </button>
         <button type="button" class="btn btn-primary" id="next"> ></button>
         <button type="button" class="btn btn-primary" id="next2"> >></button>
+        <button type="button" class="btn btn-primary" id="next3"> >>></button>
     </div>
 </center>
 {% endblock %}

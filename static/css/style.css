@@ -1,6 +1,7 @@
+
 .head_image{
     width: 100%;
-    height: 163px
+    height: 100%;
 }
 
 
@@ -16,8 +17,6 @@
     font-size: 28px;
     text-shadow: 1px 1px 1px #000;
 }
-
-
 
 .wrapper {
     display: grid;
@@ -35,17 +34,90 @@
     background-color: gainsboro;
 }
 
+.head-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: url(../img/head-png.png);
+    height: 44px;
+}
+
 .head {
     grid-column: 1/3;
     padding: 0px !important;
     height: 165px !important;
-    margin: 0px !important
+    margin: 0px !important;
+    background: url(../img/head-bg.png) no-repeat center;
+
 }
 
 .files_list {
+    margin-top: 0px;
     margin-left: 10% !important;
-    grid-row: 3/8
+    grid-row: 3/8;
 }
+
+a {
+    text-decoration: none;
+    border: none;
+}
+
+.list2a {
+    margin-top: 0px !important;
+	margin-bottom: 8px;
+	padding:0;
+	list-style: none;
+	counter-reset: li;
+}
+.list2a li {
+	position: relative;
+	border: 2px solid #337AB7;
+	background: #EBF3FA;
+	padding:16px 20px 16px 28px;
+	margin:12px 0 12px 40px;
+	-webkit-transition-duration: 0.3s;
+	transition-duration: 0.3s;
+}
+.list2a li:hover {
+	background: #FFF;
+}
+.list2a li:before {
+	line-height: 32px;
+	position: absolute;
+	top: 4px;
+	left:-40px;
+	width:40px;
+	text-align:center;
+	font-size: 16px;
+	font-weight: bold;
+	color: #FFF;
+	background: #337AB7;
+	counter-increment: li;
+	content: counter(li);
+	-webkit-transition-duration: 0.2s;
+	transition-duration: 0.2s;
+}
+.list2a li:hover:before {
+	width:46px;
+}
+.list2a li:after {
+	position: absolute;
+	left: 0;
+	top: 4px;
+	content: "";
+	height: 0;
+	width: 0;
+	border: 16px solid transparent;
+	border-left-color: #337AB7;
+	-webkit-transition-duration: 0.2s;
+	transition-duration: 0.2s
+}
+.list2a li:hover:after {
+	margin-left: 6px;
+}
+
+
 
 .block {
     margin-right: 3% !important;
@@ -60,6 +132,12 @@
     position: absolute;
     left: 0;
     top: 0;
+}
+
+.lightcurve_graph img {
+    position: relative;
+    margin: auto 0;
+    
 }
 
 .something_and_slider {

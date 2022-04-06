@@ -8,27 +8,31 @@
 	<link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
 </head>
 
-
 <body>
+    <div class="head-bar">
+    </div>
     <div class="wrapper">
         <div class="head">
-            <div><img src="{{url_for('static', filename='img/head-bg.png')}}" alt="" class="head_image"></div>
             <div class="center">
-                <a href="/" class="logo">
+                <a href="https://uhecr.sinp.msu.ru/ru/index.html" class="logo">
                 <img src="{{url_for('static', filename='img/logo.png')}}">
                 Лаборатория космических лучей<br> предельно высоких энергий НИИЯФ МГУ</a>
 
             </div>
         </div>
         <center class="main_text"><h2>Данные с УФ-телескопа обсерватории ПГИ для исследования полярных сияний</h2></center>
-        <div class="files_list">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptate a aliquid, perferendis vel ut pariatur at nemo blanditiis, in vitae facilis consectetur quis harum. Asperiores eaque itaque fuga, magnam officiis atque recusandae veritatis commodi maiores eos voluptas harum sequi rem cum quasi molestiae, delectus praesentium impedit. Sunt inventore, dolore voluptates eius aperiam, officiis officia maiores excepturi neque rem praesentium quisquam non molestiae. Mollitia corrupti rem doloremque placeat consequatur cumque alias. Perferendis vel veniam adipisci tempora nihil, facere, quo recusandae vitae voluptas maiores cum ut similique asperiores provident quia dolore, minus ea eaque. Et at doloremque modi minus sapiente, vero assumenda?
+        <div class="files_list" id="listing">
+            <ul class="list2a">
+                {% for elem in files_list %}
+                <li> <a href="#">{{ elem }}</a> </li>
+                {% endfor %}
+            </ul>
         </div>
 
 
 
         <div class="block">
-            {% block light_curve %}{% endblock %}
+            {% block lightcurve %}{% endblock %}
         </div>
         <div class="block">
             {% block keogramm %}{% endblock %}
@@ -38,10 +42,9 @@
             {% block heatmap %}{% endblock %}
         </div>
         <div class="block">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptate a aliquid, perferendis vel ut pariatur at nemo blanditiis, in vitae facilis consectetur quis harum. Asperiores eaque itaque fuga, magnam officiis atque recusandae veritatis commodi maiores eos voluptas harum sequi rem cum quasi molestiae, delectus praesentium impedit. Sunt inventore, dolore voluptates eius aperiam, officiis officia maiores excepturi neque rem praesentium quisquam non molestiae. Mollitia corrupti rem doloremque placeat consequatur cumque alias. Perferendis vel veniam adipisci tempora nihil, facere, quo recusandae vitae voluptas maiores cum ut similique asperiores provident quia dolore, minus ea eaque. Et at doloremque modi minus sapiente, vero assumenda?
         </div>
     </div>
-    
+
     
 </body>
 </html>

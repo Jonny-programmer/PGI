@@ -4,6 +4,8 @@ import plotly.express as px
 import numpy as np
 from h5py import File
 from scipy import signal
+import os
+
 
 file = File('./static/mat/2022-01-26-d3-nz.mat')
 
@@ -78,7 +80,11 @@ def main():
             graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
             return graphJSON
     else:
-        return render_template('main.html')
+        files_list = []
+        for elem in os.listdir('static/mat/'):
+            if not elem.startswith('.'):
+                files_list.append(elem)
+        return render_template('main.html', files_list=files_list)
 
 
 if __name__ == "__main__":

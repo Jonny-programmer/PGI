@@ -25,8 +25,8 @@
                     type: 'heatmap_button_event',
                     current: window.current,
                     pos: 'last',
-                    value0: window.value0,
-                    value1: window.value1
+                    value0: window.value_heatmap0,
+                    value1: window.value_heatmap1
                 }),
                 datatype: 'text',
                 success: window.funcSucces
@@ -76,8 +76,8 @@
                 datatype: 'text',
                 success: firstSuccess
             })
-        window.value0 = 20000
-        window.value1 = 200000
+        window.value_heatmap0 = 20000
+        window.value_heatmap1 = 200000
 
     })
 
@@ -111,8 +111,81 @@
     <div></div>
     <div>
         <div id="keogram_slider" class="ui-slider-vertical"></div>
+        <div id="first_keogram_text" class="slider_text"></div>
+        <div id="second_keogram_text" class="slider_text"></div>
     </div>
 </div>
+
+
+<script>
+    $( ".ui-slider-vertical" ).slider({
+        animate: 100,
+        range: "min",
+        min: 20000,
+        max: 500000,
+        values: [20000, 200000],
+        orientation: "vertical",
+        step: 10000
+        });
+
+
+    text_position = function(value, id){
+    let left_pos = $( id ).offset().left + 1.8 * $( id ).width();
+    let a = 450 - $( id ).height() * ((value - 20000) / 480000)
+    let top_pos = $( id ).offset().top + a - 15;
+    return [left_pos, top_pos]
+    }
+
+    window.change_pos = function(value, id1, id2){
+        $(id1).offset({top: text_position(value, id2)[1], left: text_position(value, id2)[0]});
+        $(id1).text(value / 1000 + 'K');
+    }
+
+    keogram_success = function(data) {
+        $("#keogram_graph").remove();
+        $('<div>', {
+            id: 'keogram_graph'
+        }).appendTo("#keogram")
+        let graphs = JSON.parse(data);
+        console.log(graphs);
+        Plotly.plot('keogram_graph', graphs, {});
+    }
+
+
+    $( "#keogram_slider" ).slider({
+        slide: function( event, ui ) {
+        window.change_pos(ui.values[0], " #first_keogram_text ", " #keogram_slider ");
+        window.change_pos(ui.values[1], " #second_keogram_text ", " #keogram_slider ");
+        }
+    });
+
+    $( "#keogram_slider" ).slider({
+        stop: function( event, ui ) {
+        window.value_keogram0 = ui.values[0];
+        window.value_keogram1 = ui.values[1];
+        $.ajax({
+                url: "/",
+                type: 'POST',
+                data: ({
+                    type: 'keogram_slider_event',
+                    value0: ui.values[0],
+                    value1: ui.values[1],
+                }),
+                datatype: 'text',
+                success: keogram_success
+            })
+        }
+    });
+
+    $(document).ready(function() {
+    window.change_pos(20000, " #first_keogram_text ", " #keogram_slider ");
+    window.change_pos(200000, " #second_keogram_text ", " #keogram_slider ");
+    window.value_keogram0 = 20000;
+    window.value_keogram1 = 200000;
+    })
+
+
+</script>
 {% endblock %}
 
 
@@ -129,8 +202,8 @@
     <div></div>
     <div>
         <div id="heatmap_slider" class="ui-slider-vertical"></div>
-        <div id="first_text" class="slider_text">dghth</div>
-        <div id="second_text" class="slider_text">dghth</div>
+        <div id="first_heatmap_text" class="slider_text"></div>
+        <div id="second_heatmap_text" class="slider_text"></div>
     </div>
 </div>
 <script>
@@ -149,24 +222,12 @@
     });
 
 
-    text_position = function(value){
-        let left_pos = $( "#heatmap_slider" ).offset().left + 1.8 * $( "#heatmap_slider" ).width();
-        let a = 450 - $( "#heatmap_slider" ).height() * ((value - 20000) / 480000)
-        let top_pos = $( "#heatmap_slider" ).offset().top + a - 15;
-        return [left_pos, top_pos]
-    }
-
-    change_pos = function(value, id){
-        $(id).offset({top: text_position(value)[1], left: text_position(value)[0]});
-        $(id).text(value / 1000 + 'K')
-    }
-
     $( "#heatmap_slider" ).slider({
     slide: function( event, ui ) {
-        change_pos(ui.values[0], " #first_text ");
-        change_pos(ui.values[1], " #second_text ");
-        window.value0 = ui.values[0];
-        window.value1 = ui.values[1];
+        window.change_pos(ui.values[0], " #first_heatmap_text ", " #heatmap_slider ");
+        window.change_pos(ui.values[1], " #second_heatmap_text ", " #heatmap_slider ");
+        window.value_heatmap0 = ui.values[0];
+        window.value_heatmap1 = ui.values[1];
         $.ajax({
                 url: "/",
                 type: 'POST',
@@ -183,11 +244,10 @@
 });
 
     $(document).ready(function() {
-        console.log('aergaerf')
-        change_pos(20000, " #first_text ");
-        change_pos(200000, " #second_text ");
-        window.value0 = 20000;
-        window.value1 = 200000;
+        window.change_pos(20000, " #first_heatmap_text ", " #heatmap_slider ");
+        window.change_pos(200000, " #second_heatmap_text ", " #heatmap_slider ");
+        window.value_heatmap0 = 20000;
+        window.value_heatmap1 = 200000;
         })
 
 

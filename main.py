@@ -17,7 +17,6 @@ unix_time = [np.linspace(unix_time[i], unix_time[i + 1], 128) for i in range(len
 UNIX_TIME = np.concatenate(unix_time)
 
 
-
 def Heatmap(frame: int, max_min_values: list):
     data = file['pdm_2d_rot_global']
     array = data[frame]
@@ -25,8 +24,9 @@ def Heatmap(frame: int, max_min_values: list):
     fig = px.imshow(array, zmax=max(max_min_values), zmin=min(max_min_values), aspect='equal', origin='upper')
 
     fig.update_layout(legend_orientation="h",
-                      legend=dict(title=f"This is frame number {frame} out of {len(data)} <br> timestamp is {UNIX_TIME[frame]:.3f} seconds",
-                                  x=.5, xanchor='center', bordercolor='red', borderwidth=3,),
+                      legend=dict(
+                          title=f"This is frame number {frame} out of {len(data)} <br> timestamp is {UNIX_TIME[frame]:.3f} seconds",
+                          x=.5, xanchor='center', bordercolor='red', borderwidth=3, ),
                       showlegend=True,
                       xaxis_title="",
                       yaxis_title="",
@@ -35,8 +35,7 @@ def Heatmap(frame: int, max_min_values: list):
     return fig
 
 
-def Keogram():
-
+def Keogram(max_min_values: list):
     diag_global = file["diag_global"]
     diag_global = np.rot90(diag_global)
     print("Size of diag_global:", len(diag_global), len(diag_global[0]), "\nsize of UNIX_TIME:", len(UNIX_TIME), 1)
@@ -46,10 +45,11 @@ def Keogram():
     UNIX_TIME_2 = np.concatenate((UNIX_TIME, a)).reshape(-1, q)[:, 0]
     diag_global_2 = signal.decimate(diag_global, q=q, ftype='fir')
 
-    fig = px.imshow(diag_global_2, x=UNIX_TIME_2, contrast_rescaling='minmax', aspect='auto')
+    fig = px.imshow(diag_global_2, x=UNIX_TIME_2, zmax=max(max_min_values), zmin=min(max_min_values), aspect='auto')
 
     fig.update_layout()
     return fig
+
 
 app = Flask(__name__, template_folder='templates')
 
@@ -59,7 +59,7 @@ def main():
     if request.method == 'POST':
         if request.values.get('type') == 'first_event':
             fig1 = Heatmap(1, [20000, 200000])
-            fig2 = Keogram()
+            fig2 = Keogram([20000, 200000])
             heatmap_graph = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
             keogram_graph = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
             result = {'heatmap': heatmap_graph, 'keogram': keogram_graph}
@@ -69,7 +69,6 @@ def main():
             changes = {'next': 1, 'next2': 10, 'next3': 1000, 'last': -1, 'last2': -10, 'last3': -1000}
             current += changes[request.values.get('pos')]
             values = [int(request.values.get('value0')), int(request.values.get('value1'))]
-            print(values)
             fig = Heatmap(current, values)
             graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
             return graphJSON
@@ -79,6 +78,12 @@ def main():
             fig = Heatmap(current, values)
             graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
             return graphJSON
+        elif request.values.get('type') == 'keogram_slider_event':
+            values = [int(request.values.get('value0')), int(request.values.get('value1'))]
+            fig = Keogram(values)
+            graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+            return graphJSON
+
     else:
         files_list = []
         for elem in os.listdir('static/mat/'):

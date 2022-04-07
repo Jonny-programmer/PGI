@@ -1,24 +1,49 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Flask Intro - login page</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="static/bootstrap.min.css" rel="stylesheet" media="screen">
-  </head>
-  <body>
-    <div class="container">
-      <h1>Please login</h1>
-      <br>
-      <form action="" method="post">
-        <input type="text" placeholder="Username" name="username" value="{{
-          request.form.username }}">
-         <input type="password" placeholder="Password" name="password" value="{{
-          request.form.password }}">
-        <input class="btn btn-default" type="submit" value="Login">
-      </form>
-      {% if error %}
-        <p class="error"><strong>Error:</strong> {{ error }}
-      {% endif %}
-    </div>
-  </body>
+	<head>
+		<meta charset="utf-8">
+		<title>Sign up</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<!-- MATERIAL DESIGN ICONIC FONT -->
+		<link rel="stylesheet" href="../static/fonts/material-design-iconic-font/css/material-design-iconic-font.min.css">
+
+		<!-- STYLE CSS -->
+		<link rel="stylesheet" href="../static/css/login_style.css">
+		<!-- Libraries -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+
+    </head>
+
+	<body>
+		<div class="wrapper" style="background-image: url('../static/img/bg-registration-form-2_2.jpg');">
+			<div class="inner">
+				<form method="post" name='fromValidation' id='fromValidation'>
+					<h3>Вход</h3>
+					<div class="form-wrapper">
+						{{ form.email.label }}
+						{{ form.email(type="email", class="form-control", id="email") }}
+					</div>
+					<div class="form-wrapper">
+						{{ form.password.label }}
+						{{ form.password(type="password", class="form-control", id="pass1") }}
+					</div>
+					<div class="error_msg">
+						{{ message }}
+					</div>
+					<div class="remember">
+						{{ form.remember_me() }}
+						{{ form.remember_me.label }}
+					</div>
+
+					<div class='text-center'>
+					    <button type='submit' id='submit'>Войти</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+	</body>
 </html>

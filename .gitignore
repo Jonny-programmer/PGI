@@ -1,6 +1,5 @@
 # Something
-static/mat/
-data/
+static/mat/*
 
 # PYTHON FILES
 # Byte-compiled / optimized / DLL files

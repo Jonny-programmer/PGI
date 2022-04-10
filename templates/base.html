@@ -9,10 +9,11 @@
 </head>
 
 <body>
-    <div class="head-bar">
-    </div>
+
     <div class="wrapper">
         <div class="head">
+            <div class="head-bar">
+            </div>
             <div class="center">
                 <a href="https://uhecr.sinp.msu.ru/ru/index.html" class="logo">
                 <img src="{{url_for('static', filename='img/logo.png')}}">
@@ -37,7 +38,7 @@
         <div class="block">
             {% block keogramm %}{% endblock %}
         </div>
-        
+
         <div class="block">
             {% block heatmap %}{% endblock %}
         </div>
@@ -45,6 +46,6 @@
         </div>
     </div>
 
-    
+
 </body>
 </html>

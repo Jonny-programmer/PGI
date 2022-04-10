@@ -19,8 +19,9 @@ print("Length of UNIX_TIME:", len(UNIX_TIME))
 
 y2 = np.concatenate(light_curve)
 # Downsampling
-q = 320
-UNIX_TIME_2 = UNIX_TIME.reshape(-1, q)[:, 0]
+q = 12400
+a = np.zeros(q - UNIX_TIME.shape[0] + ((UNIX_TIME.shape[0] + 1) // q) * q)
+UNIX_TIME_2 = np.concatenate((UNIX_TIME, a)).reshape(-1, q)[:, 0]
 light_curve_2 = signal.decimate(y2, q=q, ftype='fir', n=8)
 
 light_curve = px.line(x=UNIX_TIME_2, y=light_curve_2)

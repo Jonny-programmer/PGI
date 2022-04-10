@@ -15,16 +15,14 @@
 <script>
 
     return_button_func = function (name){
-        let a = {'next': 1, 'next2': 10, 'next3': 1000, 'last': -1, 'last2': -10, 'last3': -1000}
         return function(){
-            window.current += a[name]
             $.ajax({
                 url: "/",
                 type: 'POST',
                 data: ({
                     type: 'heatmap_button_event',
                     current: window.current,
-                    pos: 'last',
+                    pos: name,
                     value0: window.value_heatmap0,
                     value1: window.value_heatmap1
                 }),
@@ -35,23 +33,42 @@
     }
 
     window.funcSucces = function(data) {
+        window.current = data['current']
         $("#text_id").html('You are on the frame number ' + window.current)
-        console.log(window.current)
         $("#heatmap_graph").remove();
         $('<div>', {
             id: 'heatmap_graph'
         }).appendTo("#heatmaps")
-        let graphs = JSON.parse(data);
-        console.log(graphs);
+        let graphs = JSON.parse(data['heatmap']);
         Plotly.plot('heatmap_graph', graphs, {});
     }
 
     function firstSuccess(data){
         let heatmap_graph = JSON.parse(data['heatmap']);
         let keogramm_graph = JSON.parse(data['keogram']);
-        console.log(heatmap_graph)
-        Plotly.plot('heatmap_graph', heatmap_graph, {});
+        let lightcurve_graph = JSON.parse(data['lightcurve']);
+        Plotly.plot('lightcurve_graph', lightcurve_graph, {})
         Plotly.plot('keogram_graph', keogramm_graph, {});
+        Plotly.plot('heatmap_graph', heatmap_graph, {});
+
+        lightcurve = document.getElementById('lightcurve_graph')
+
+        lightcurve.on('plotly_click', function(data){
+            let x = data.points[0].x;
+            $.ajax({
+                url: "/",
+                type: 'POST',
+                data: ({
+                    type: 'lightcurve_click_event',
+                    x: x,
+                    value0: window.value_heatmap0,
+                    value1: window.value_heatmap1
+                }),
+                datatype: 'text',
+                success: window.funcSucces
+            })
+        })
+
     }
 
     $(document).ready(function () {
@@ -84,19 +101,17 @@
 </script>
 {% endblock %}
 
-{% block light_curve %}
-
-{% endblock %}
-
-
 
 {% block lightcurve %}
-<h1> Lightcurve</h1>
-<div id="Lightcurve">
+<h1>Light Curve</h1>
+
+<div id="lightcurve" class="lightcurve">
     <div id="lightcurve_graph">
-        <img src="../static/img/graphs_tmp_images/Lightcurve.png"/>
     </div>
 </div>
+
+
+
 {% endblock %}
 
 
@@ -111,8 +126,8 @@
     <div></div>
     <div>
         <div id="keogram_slider" class="ui-slider-vertical"></div>
-        <div id="first_keogram_text" class="slider_text"></div>
-        <div id="second_keogram_text" class="slider_text"></div>
+        <div id="first_keogram_text" class="slider_text">a</div>
+        <div id="second_keogram_text" class="slider_text">a</div>
     </div>
 </div>
 
@@ -125,20 +140,21 @@
         max: 500000,
         values: [20000, 200000],
         orientation: "vertical",
-        step: 10000
+        step: 1
         });
 
 
     text_position = function(value, id){
-    let left_pos = $( id ).offset().left + 1.8 * $( id ).width();
-    let a = 450 - $( id ).height() * ((value - 20000) / 480000)
-    let top_pos = $( id ).offset().top + a - 15;
-    return [left_pos, top_pos]
+        let top_pos = $( id ).height() * (1- value / 500000);
+        let left_pos = 2 * $( id ).width();
+        return [left_pos, top_pos]
     }
 
     window.change_pos = function(value, id1, id2){
-        $(id1).offset({top: text_position(value, id2)[1], left: text_position(value, id2)[0]});
         $(id1).text(value / 1000 + 'K');
+        value_left = text_position(value, id2)[0] + $(id2).position().left
+        value_top = text_position(value, id2)[1] + $(id2).position().top - $( id1 ).height() / 2
+        $(id1).offset({top: value_top, left: value_left});
     }
 
     keogram_success = function(data) {
@@ -147,7 +163,6 @@
             id: 'keogram_graph'
         }).appendTo("#keogram")
         let graphs = JSON.parse(data);
-        console.log(graphs);
         Plotly.plot('keogram_graph', graphs, {});
     }
 
@@ -202,8 +217,8 @@
     <div></div>
     <div>
         <div id="heatmap_slider" class="ui-slider-vertical"></div>
-        <div id="first_heatmap_text" class="slider_text"></div>
-        <div id="second_heatmap_text" class="slider_text"></div>
+        <div id="first_heatmap_text" class="slider_text">a</div>
+        <div id="second_heatmap_text" class="slider_text">a</div>
     </div>
 </div>
 <script>
@@ -214,18 +229,22 @@
     $( ".ui-slider-vertical" ).slider({
     animate: 100,
     range: "min",
-    min: 20000,
+    min: 0,
     max: 500000,
     values: [20000, 200000],
     orientation: "vertical",
-    step: 10000
+    step: 1
     });
 
-
     $( "#heatmap_slider" ).slider({
-    slide: function( event, ui ) {
+        slide: function( event, ui ) {
         window.change_pos(ui.values[0], " #first_heatmap_text ", " #heatmap_slider ");
         window.change_pos(ui.values[1], " #second_heatmap_text ", " #heatmap_slider ");
+        }
+    });
+
+    $( "#heatmap_slider" ).slider({
+        stop: function( event, ui ) {
         window.value_heatmap0 = ui.values[0];
         window.value_heatmap1 = ui.values[1];
         $.ajax({
@@ -243,6 +262,8 @@
     }
 });
 
+
+
     $(document).ready(function() {
         window.change_pos(20000, " #first_heatmap_text ", " #heatmap_slider ");
         window.change_pos(200000, " #second_heatmap_text ", " #heatmap_slider ");
@@ -255,17 +276,12 @@
 </script>
 
 <center>
-    <h5 class="header" id="text_id">You are on the frame number 0</h5>
+    <h5 class="header" id="text_id">You are on the frame number 1</h5>
     <div class="btn-group" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-primary" id="last3">
-            <<<
-        </button>
-        <button type="button" class="btn btn-primary" id="last2">
-            <<
-        </button>
-        <button type="button" class="btn btn-primary" id="last">
-            <
-        </button>
+        <button type="button" class="btn btn-primary" id="last3"><<<</button>
+        <button type="button" class="btn btn-primary" id="last2"><<</button>
+        <button type="button" class="btn btn-primary" id="last"><</button>
+        <button type="button" class="btn btn-primary" id="play">▶ </button>
         <button type="button" class="btn btn-primary" id="next"> ></button>
         <button type="button" class="btn btn-primary" id="next2"> >></button>
         <button type="button" class="btn btn-primary" id="next3"> >>></button>

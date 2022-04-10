@@ -5,6 +5,14 @@ import numpy as np
 from h5py import File
 from scipy import signal
 import os
+from flask import Flask, render_template, redirect, make_response
+from flask import request, session, jsonify
+from data import db_session
+from data.structure import User, Comments
+from forms.new_user import RegisterForm
+from forms.login import LoginForm
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_restful import reqparse, abort, Api, Resource
 
 file = File('./static/mat/2022-01-26-d3-nz.mat')
 
@@ -63,10 +71,27 @@ def Light_curve():
     return fig
 
 app = Flask(__name__, template_folder='templates')
+app.config['SECRET_KEY'] = '820b4ad02742e6630b554a48de7d2d9f'
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'users.login'
+
+api = Api(app)
+
+db_session.global_init("db/users.db")
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    db_sess = db_session.create_session()
+    return db_sess.query(User).get(user_id)
 
 
 @app.route("/", methods=["GET", "POST"])
 def main():
+    # db_sess = db_session.create_session()
+    # here we can use
+    # if current_user.is_authenticated:
     if request.method == 'POST':
         if request.values.get('type') == 'first_event':
             fig1 = Heatmap(1, [20000, 200000])
@@ -113,6 +138,59 @@ def main():
             if not elem.startswith('.'):
                 files_list.append(elem)
         return render_template('main.html', files_list=files_list)
+
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def reqister():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        if form.password.data != form.password_again.data:
+            return render_template('register.html', title='Регистрация',
+                                   form=form,
+                                   message="Пароли не совпадают")
+        db_sess = db_session.create_session()
+        if db_sess.query(User).filter(User.email == form.email.data).first():
+            return render_template('register.html', title='Регистрация',
+                                   form=form,
+                                   message="Такой пользователь уже есть")
+        user = User(
+            name=form.name.data,
+            surname=form.surname.data,
+            email=form.email.data,
+        )
+        user.set_password(form.password.data)
+        db_sess.add(user)
+        db_sess.commit()
+        return redirect('/login')
+    return render_template('register.html', title='Регистрация', form=form)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user, remember=form.remember_me.data)
+            return redirect("/")
+        return render_template('login.html',
+                               message="Неправильный логин или пароль",
+                               form=form)
+    return render_template('login.html', title='Авторизация', form=form)
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
+
+
+@app.errorhandler(404)
+def abort_if_not_found(error):
+    return render_template('404.html')
 
 
 if __name__ == "__main__":

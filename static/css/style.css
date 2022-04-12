@@ -59,6 +59,9 @@ h2 {
 
 }
 
+
+
+
 .files_list {
     margin-top: 0px;
     margin-left: 10% !important;
@@ -156,7 +159,7 @@ a {
 }
 
 .ui-slider-vertical {
-    height: 450px;
+    min-height: 300px;
 }
 
 .slider_text{

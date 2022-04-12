@@ -1,4 +1,4 @@
-## Readme now for developers:
+## Readme for developers:
 
 1) You need to copy the following link and download files for practising.
 
@@ -6,13 +6,14 @@
 
 > Download all the files directly in the /data folder, they are already added to .gitignore
 
-2) Usage example of listing files in ./data dir:
-(from PGI dir)
+2) Usage example:
+
 ```
-npm install node
-node ./js/files_array.js > files.html
+git clone https://github.com/Jonny-programmer/PGI
+cd PGI
+pip install -r requirements.txt
 ```
 3) Starting the app:
 ```commandline
-python3 app.py
+python3 main.py
 ```

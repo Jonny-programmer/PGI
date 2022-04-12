@@ -1,18 +1,20 @@
-import plotly
-from flask import *
-import plotly.express as px
+import os
+
 import numpy as np
+import plotly
+import plotly.express as px
+from flask import *
+from flask import Flask, render_template, redirect
+from flask import request
+from flask_login import LoginManager, login_user, logout_user, login_required
+from flask_restful import Api
 from h5py import File
 from scipy import signal
-import os
-from flask import Flask, render_template, redirect, make_response
-from flask import request, session, jsonify
+
 from data import db_session
-from data.structure import User, Comments
-from forms.new_user import RegisterForm
+from data.structure import User
 from forms.login import LoginForm
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from flask_restful import reqparse, abort, Api, Resource
+from forms.new_user import RegisterForm
 
 file = File('./static/mat/2022-01-26-d3-nz.mat')
 
@@ -79,7 +81,6 @@ login_manager.login_view = 'users.login'
 api = Api(app)
 
 db_session.global_init("db/users.db")
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -153,8 +154,12 @@ def reqister():
         if db_sess.query(User).filter(User.email == form.email.data).first():
             return render_template('register.html', title='Регистрация',
                                    form=form,
-                                   message="Такой пользователь уже есть")
+                                   message="Учетная запись с таким почтовым адресом уже сущестует")
+        if db_sess.query(User).filter(form.nickname.data == User.nickname).first():
+            return render_template('register.html', title='Регистрация',
+                                   message="Такое имя пользователя уже существует")
         user = User(
+            nickname=form.nickname.data,
             name=form.name.data,
             surname=form.surname.data,
             email=form.email.data,
@@ -172,8 +177,12 @@ def login():
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.email == form.email.data).first()
+        if not user:
+            user = db_sess.query(User).filter(User.nickname == form.email.data).first()
+
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
+            print("Somebody is trying to log in")
             return redirect("/")
         return render_template('login.html',
                                message="Неправильный логин или пароль",
@@ -192,6 +201,21 @@ def logout():
 def abort_if_not_found(error):
     return render_template('404.html')
 
+
+@app.route('/users/<nickname>')
+@login_required
+def user(nickname):
+    user = User.query.filter_by(nickname=nickname).first()
+    if user == None:
+        flash('User ' + nickname + ' not found.')
+        return redirect(url_for('index'))
+    posts = [
+        { 'author': user, 'body': 'Test post #1' },
+        { 'author': user, 'body': 'Test post #2' }
+    ]
+    return render_template('user.html',
+        user = user,
+        posts = posts)
 
 if __name__ == "__main__":
     app.run(port=8408, debug=True)

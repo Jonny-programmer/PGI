@@ -21,7 +21,7 @@
 <script src="https://atuin.ru/demo/ui-slider/jquery.ui.touch-punch.min.js"></script>
 
 <script>
-    $(document).ready(function() {
+    $( "#keogram_graph" ).ready(function() {
         setInterval(function() {
             let p = $(".preloader");
             p.css('opacity', 0);
@@ -29,7 +29,7 @@
             setInterval(() => p.remove(),
                 parseInt(p.css('--duration')) * 1000
             );
-        }, 3000);
+        }, 15000);
     });
 </script>
 

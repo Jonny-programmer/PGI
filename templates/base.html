@@ -5,10 +5,17 @@
 	<title>Main page</title>
 	<meta name="description" content="Data from UV telescope located in PGI observatory for the analysis of auroras">
     {% block scripts %}{% endblock %}
-	<link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
 </head>
 
 <body>
+
+    <div class="preloader">
+        <div class="preloader__content">
+            <div class="preloader__first"></div>
+            <div class="preloader__second"></div>
+            <div class="preloader__third"></div>
+        </div>
+    </div>
 
     <div class="wrapper">
         <div class="head">
@@ -23,7 +30,7 @@
         </div>
         <center class="main_text"><h2>Данные с УФ-телескопа обсерватории ПГИ для исследования полярных сияний</h2></center>
         <div class="files_list" id="listing">
-            <ul class="list2a">
+            <ul class="__files__list__">
                 {% for elem in files_list %}
                 <li> <a href="#">{{ elem }}</a> </li>
                 {% endfor %}
@@ -44,8 +51,16 @@
         </div>
         <div class="block">
         </div>
+
+        <div class="footer">
+            <div class="center">
+                <div class="cop" align="left">
+                    <strong >Главная страница, 2022</strong><br>
+                    <em>ЛЕНИНСКИЕ ГОРЫ Д.1, СТР. 6</em>
+                    <span>|</span><a href="https://uhecr.sinp.msu.ru/ru/kontakty.html"> Контакты</a>
+                </div>
+            </div>
+        </div>
     </div>
-
-
 </body>
 </html>

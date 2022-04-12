@@ -1,39 +1,5 @@
 {% extends "base.html" %}
 
-
-{% block scripts %}
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-
-<link rel="icon" href="{{ url_for('static', filename='icons/favicon.png') }}" type="image/png">
-<link rel="icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" type="image/x-icon">
-<link rel="shortcut icon" href="{{ url_for('static', filename='icons/favicon.png') }}" type="image/png">
-<link rel="shortcut icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" type="image/x-icon">
-
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/preloader.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
-<script src="https://atuin.ru/demo/ui-slider/jquery-ui.min.js"></script>
-<link rel="stylesheet" href="https://atuin.ru/demo/ui-slider/jquery-ui.css">
-<script src="https://atuin.ru/demo/ui-slider/jquery.ui.touch-punch.min.js"></script>
-
-<script>
-    $( "#keogram_graph" ).ready(function() {
-        setInterval(function() {
-            let p = $(".preloader");
-            p.css('opacity', 0);
-
-            setInterval(() => p.remove(),
-                parseInt(p.css('--duration')) * 1000
-            );
-        }, 15000);
-    });
-</script>
-
-
 <script>
     return_button_func = function (name){
         return function(){
@@ -120,40 +86,51 @@
     })
 
 </script>
-{% endblock %}
 
 
-{% block lightcurve %}
-<h1>Light Curve</h1>
+<!-- HERE STARTS THE ACTUAL DESIGN OF MAIN PAGE -->
+{% block content %}
 
-<div id="lightcurve" class="lightcurve">
-    <div id="lightcurve_graph">
+<center class="main_text"><h2>Данные с УФ-телескопа обсерватории ПГИ для исследования полярных сияний</h2></center>
+<div class="files_list" id="listing">
+    <ul class="__files__list__">
+        {% for elem in files_list %}
+        <li> <a href="#">{{ elem }}</a> </li>
+        {% endfor %}
+    </ul>
+</div>
+
+
+
+<div class="block">
+    <h1>Light Curve</h1>
+
+    <div id="lightcurve" class="lightcurve">
+        <div id="lightcurve_graph">
+        </div>
     </div>
 </div>
 
 
 
-{% endblock %}
 
 
-
-{% block keogramm %}
-<h1>Keogramm</h1>
-<div class="something_and_slider">
+<div class="block">
+    <h1>Keogramm</h1>
+    <div class="something_and_slider">
     <div id="keogram" class="keogram">
         <div id="keogram_graph">
         </div>
     </div>
-    <div></div>
+
     <div>
         <div id="keogram_slider" class="ui-slider-vertical"></div>
         <div id="first_keogram_text" class="slider_text">a</div>
         <div id="second_keogram_text" class="slider_text">a</div>
     </div>
-</div>
+    </div>
 
-
-<script>
+    <script>
     $( ".ui-slider-vertical" ).slider({
         animate: 100,
         range: "min",
@@ -219,92 +196,93 @@
     window.value_keogram0 = 20000;
     window.value_keogram1 = 200000;
     })
-
-
-</script>
-{% endblock %}
-
+    </script>
+</div>
 
 
 
 
-{% block heatmap %}
-<h1>Frame</h1>
-<div class="something_and_slider">
-    <div id="heatmaps">
-        <div id="heatmap_graph">
+
+
+
+<div class="block">
+    <h1>Frame</h1>
+    <div class="something_and_slider">
+        <div id="heatmaps">
+            <div id="heatmap_graph">
+            </div>
+        </div>
+        <div></div>
+        <div>
+            <div id="heatmap_slider" class="ui-slider-vertical"></div>
+            <div id="first_heatmap_text" class="slider_text">a</div>
+            <div id="second_heatmap_text" class="slider_text">a</div>
         </div>
     </div>
-    <div></div>
-    <div>
-        <div id="heatmap_slider" class="ui-slider-vertical"></div>
-        <div id="first_heatmap_text" class="slider_text">a</div>
-        <div id="second_heatmap_text" class="slider_text">a</div>
-    </div>
-</div>
-<script>
-    window.current = 1;
-</script>
+    <script>
+        window.current = 1;
+    </script>
 
-<script>
-    $( ".ui-slider-vertical" ).slider({
-    animate: 100,
-    range: "min",
-    min: 0,
-    max: 500000,
-    values: [20000, 200000],
-    orientation: "vertical",
-    step: 1
-    });
+    <script>
+        $( ".ui-slider-vertical" ).slider({
+        animate: 100,
+        range: "min",
+        min: 0,
+        max: 500000,
+        values: [20000, 200000],
+        orientation: "vertical",
+        step: 1
+        });
 
-    $( "#heatmap_slider" ).slider({
-        slide: function( event, ui ) {
-        window.change_pos(ui.values[0], " #first_heatmap_text ", " #heatmap_slider ");
-        window.change_pos(ui.values[1], " #second_heatmap_text ", " #heatmap_slider ");
+        $( "#heatmap_slider" ).slider({
+            slide: function( event, ui ) {
+            window.change_pos(ui.values[0], " #first_heatmap_text ", " #heatmap_slider ");
+            window.change_pos(ui.values[1], " #second_heatmap_text ", " #heatmap_slider ");
+            }
+        });
+
+        $( "#heatmap_slider" ).slider({
+            stop: function( event, ui ) {
+            window.value_heatmap0 = ui.values[0];
+            window.value_heatmap1 = ui.values[1];
+            $.ajax({
+                    url: "/",
+                    type: 'POST',
+                    data: ({
+                        type: 'heatmap_slider_event',
+                        value0: ui.values[0],
+                        value1: ui.values[1],
+                        current: window.current
+                    }),
+                    datatype: 'text',
+                    success: window.funcSucces
+                })
         }
     });
-
-    $( "#heatmap_slider" ).slider({
-        stop: function( event, ui ) {
-        window.value_heatmap0 = ui.values[0];
-        window.value_heatmap1 = ui.values[1];
-        $.ajax({
-                url: "/",
-                type: 'POST',
-                data: ({
-                    type: 'heatmap_slider_event',
-                    value0: ui.values[0],
-                    value1: ui.values[1],
-                    current: window.current
-                }),
-                datatype: 'text',
-                success: window.funcSucces
+        $(document).ready(function() {
+            window.change_pos(20000, " #first_heatmap_text ", " #heatmap_slider ");
+            window.change_pos(200000, " #second_heatmap_text ", " #heatmap_slider ");
+            window.value_heatmap0 = 20000;
+            window.value_heatmap1 = 200000;
             })
-    }
-});
+    </script>
+
+    <center>
+        <h5 class="header" id="text_id">You are on the frame number 1</h5>
+        <div class="btn-group" role="group" aria-label="Basic example">
+            <button type="button" class="btn btn-primary" id="last3"><<<</button>
+            <button type="button" class="btn btn-primary" id="last2"><<</button>
+            <button type="button" class="btn btn-primary" id="last"><</button>
+            <button type="button" class="btn btn-primary" id="play">▶ </button>
+            <button type="button" class="btn btn-primary" id="next"> ></button>
+            <button type="button" class="btn btn-primary" id="next2"> >></button>
+            <button type="button" class="btn btn-primary" id="next3"> >>></button>
+        </div>
+    </center>
+</div>
 
 
+<div class="block">
+</div>
 
-    $(document).ready(function() {
-        window.change_pos(20000, " #first_heatmap_text ", " #heatmap_slider ");
-        window.change_pos(200000, " #second_heatmap_text ", " #heatmap_slider ");
-        window.value_heatmap0 = 20000;
-        window.value_heatmap1 = 200000;
-        })
-
-</script>
-
-<center>
-    <h5 class="header" id="text_id">You are on the frame number 1</h5>
-    <div class="btn-group" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-primary" id="last3"><<<</button>
-        <button type="button" class="btn btn-primary" id="last2"><<</button>
-        <button type="button" class="btn btn-primary" id="last"><</button>
-        <button type="button" class="btn btn-primary" id="play">▶ </button>
-        <button type="button" class="btn btn-primary" id="next"> ></button>
-        <button type="button" class="btn btn-primary" id="next2"> >></button>
-        <button type="button" class="btn btn-primary" id="next3"> >>></button>
-    </div>
-</center>
 {% endblock %}
-

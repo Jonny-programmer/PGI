@@ -73,6 +73,7 @@ a {
     border: none;
 }
 
+
 .__files__list__ {
     margin-top: 0px !important;
 	margin-bottom: 8px;
@@ -210,4 +211,19 @@ a {
 .cop strong {
     font-weight: 600;
     font-size: 12px;
+}
+
+.user_settings {
+    margin-top: 7px;
+    margin-right: 20px;
+}
+
+
+.user_settings a {
+    cursor: pointer;
+    color: white;
+
+}
+.user_settings a:hover {
+    color: green;
 }

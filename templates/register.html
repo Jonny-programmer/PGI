@@ -49,7 +49,7 @@
 						{{ form.email.label }}
 						{{ form.email(class="form-control", type="email", id="email", autocomplete='off') }}
 						{% for error in form.email.errors %}
-							<p class="alert alert-danger" role="alert">
+							<p class="alert alert-danger" role="alert" style="color:red">
 								{{ error }}
 							</p>
 						{% endfor %}
@@ -58,7 +58,7 @@
 						{{ form.password.label }}
 						{{ form.password(type="password", class="form-control", id="pass1", autocomplete="off") }}
 						{% for error in form.password.errors %}
-							<p class="alert alert-danger" role="alert">
+							<p class="alert alert-danger" role="alert" style="color:red">
                 				{{ error }}
 							</p>
 						{% endfor %}
@@ -67,11 +67,11 @@
 						{{ form.password_again.label }}
 						{{ form.password_again(id='pass2', type="password", class="form-control") }}
 						{% for error in form.password_again.errors %}
-							<p class="alert alert-danger" role="alert">
+							<p class="alert alert-danger" role="alert" style="color:red">
 								{{ error }}
 							</p>
         				{% endfor %}
-						<div class="error_msg">
+						<div class="error_msg" style="color:red">
 							{{ message }}
 						</div>
 					</div>

@@ -39,7 +39,7 @@ def Heatmap(frame: int, max_min_values: list):
 
     fig.update_layout(legend_orientation="h",
                       legend=dict(
-                          title=f"This is frame number {frame} out of {len(data)} <br> timestamp is {UNIX_TIME[frame]:.3f} seconds",
+                          title=f"This is frame number {frame} out of {len(data)} <br> timestamp is {float(UNIX_TIME[frame]):.3f} seconds",
                           x=.5, xanchor='center', bordercolor='red', borderwidth=3, ),
                       showlegend=True,
                       xaxis_title="",
@@ -66,9 +66,8 @@ def Light_curve():
     light_curve_2 = signal.decimate(y2, q=q, ftype='fir', n=8)
     fig = px.line(x=UNIX_TIME_2, y=light_curve_2)
     fig.update_layout(legend_orientation="h",
-                              legend=dict(x=.5, xanchor="center"),
-                              xaxis_title="Time",
-                              yaxis_title="Intensity", )
+                      legend=dict(x=.5, xanchor="center"),
+                      xaxis_title="Time", yaxis_title="Intensity", )
     return fig
 
 
@@ -138,7 +137,7 @@ def main():
         for elem in os.listdir('static/mat/'):
             if not elem.startswith('.'):
                 files_list.append(elem)
-        return render_template('main.html', files_list=files_list, he=current_user)
+        return render_template('main.html', files_list=files_list[:10], he=current_user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -223,7 +222,6 @@ def user(nickname):
         { 'author': user, 'body': 'Test post #2' }
     ]
     return render_template('user.html', user=user, posts=posts, he=current_user)
-
 
 
 if __name__ == "__main__":

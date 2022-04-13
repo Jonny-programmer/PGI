@@ -227,3 +227,10 @@ a {
 .user_settings a:hover {
     color: green;
 }
+
+.play {
+    margin-right: 5px;
+    margin-left: 5px;
+    border: 2px solid #8B00FF;
+    border-radius: 7px;
+}

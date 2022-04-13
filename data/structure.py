@@ -24,7 +24,7 @@ class User(SqlAlchemyBase, UserMixin):
     last_seen = sqlalchemy.Column(sqlalchemy.DateTime,
                                   default=datetime.datetime.now)
     role = sqlalchemy.Column(sqlalchemy.SmallInteger, default=ROLE_USER)
-    profile_photo = sqlalchemy.Column(sqlalchemy.BLOB, default=open('/Users/eremin/Documents/GitHub/PGI/static/icons/favicon.png', "rb").read())
+    profile_photo = sqlalchemy.Column(sqlalchemy.BLOB) # , default=open('/Users/eremin/Documents/GitHub/PGI/static/icons/favicon.png', "rb").read()
     # Связь с таблицей Comments
     comments = orm.relation("Comments", back_populates='user')
     

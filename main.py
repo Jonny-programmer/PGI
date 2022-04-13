@@ -105,7 +105,7 @@ def main():
             return result
         elif request.values.get('type') == 'heatmap_button_event':
             current = int(request.values.get('current'))
-            changes = {'next': 1, 'next2': 10, 'next3': 1000, 'last': -1, 'last2': -10, 'last3': -1000}
+            changes = {'play': 2, 'next': 1, 'next2': 10, 'next3': 1000, 'last': -1, 'last2': -10, 'last3': -1000}
             current += changes[request.values.get('pos')]
             values = [int(request.values.get('value0')), int(request.values.get('value1'))]
             fig = Heatmap(current, values)

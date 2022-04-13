@@ -5,19 +5,62 @@
 
 
 <script type="text/javascript" src="{{ url_for('static', filename='js/hm_buttons.js') }}"></script>
-
 <script type="text/javascript" src="{{ url_for('static', filename='js/def_slider_values.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        let nIntervId;
 
+        function active() {
+
+            if (!nIntervId) {
+                    nIntervId = setInterval(flashText, 100);
+            }
+
+            button_play = document.getElementById("play")
+            if (button_play.title === "Stop") {
+                clearInterval(nIntervId);
+                nIntervId = null;
+                button_play.title = "Play"
+            } else {
+                console.log("dfgfgfge")
+                button_play.title = "Stop"
+                console.log(button_play.title)
+                }
+
+            // check if already an interval has been set up
+
+        }
+
+        function flashText() {
+            $.ajax({
+                url: "/",
+                type: 'POST',
+                data: ({
+                    type: 'heatmap_button_event',
+                    current: window.current,
+                    pos: 'play',
+                    value0: window.value_heatmap0,
+                    value1: window.value_heatmap1
+                }),
+                datatype: 'text',
+                success: window.funcSucces
+            })
+        }
+
+
+        document.getElementById("play").addEventListener("click", active);
+    })
+
+</script>
 
 <center class="main_text"><h2>Данные с УФ-телескопа обсерватории ПГИ для исследования полярных сияний</h2></center>
 <div class="files_list" id="listing">
     <ul class="__files__list__">
         {% for elem in files_list %}
-        <li> <a href="#">{{ elem }}</a> </li>
+        <li><a href="#">{{ elem }}</a></li>
         {% endfor %}
     </ul>
 </div>
-
 
 
 <div class="block">
@@ -30,31 +73,23 @@
 </div>
 
 
-
-
-
 <div class="block">
     <h1>Keogramm</h1>
     <div class="something_and_slider">
-    <div id="keogram" class="keogram">
-        <div id="keogram_graph">
+        <div id="keogram" class="keogram">
+            <div id="keogram_graph">
+            </div>
         </div>
-    </div>
 
-    <div>
-        <div id="keogram_slider" class="ui-slider-vertical"></div>
-        <div id="first_keogram_text" class="slider_text">a</div>
-        <div id="second_keogram_text" class="slider_text">a</div>
-    </div>
+        <div>
+            <div id="keogram_slider" class="ui-slider-vertical"></div>
+            <div id="first_keogram_text" class="slider_text">a</div>
+            <div id="second_keogram_text" class="slider_text">a</div>
+        </div>
     </div>
 
     <script type="text/javascript" src="{{ url_for('static', filename='js/keogramm_slider.js') }}"></script>
 </div>
-
-
-
-
-
 
 
 <div class="block">
@@ -84,7 +119,7 @@
             <button type="button" class="btn btn-primary" id="last2"><<</button>
             <button type="button" class="btn btn-primary" id="last"><</button>
             <div class="play">
-                <button type="button" class="btn btn-primary" id="play">▶ </button>
+                <button type="button" class="btn btn-primary" id="play" title="Play">▶</button>
             </div>
             <button type="button" class="btn btn-primary" id="next"> ></button>
             <button type="button" class="btn btn-primary" id="next2"> >></button>

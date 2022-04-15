@@ -4,3 +4,10 @@ table {
     align-content: center;
     flex-direction: row;
 }
+
+.files_list {
+    margin-top: 0px;
+    margin-left: 10% !important;
+    grid-row: 2/5;
+    background-color: blueviolet !important;
+}

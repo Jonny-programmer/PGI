@@ -1,4 +1,5 @@
 import datetime
+
 import sqlalchemy
 from .db_session import SqlAlchemyBase
 from sqlalchemy import orm
@@ -6,25 +7,23 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from hashlib import md5
 
-
 ROLE_USER = 0
 ROLE_ADMIN = 1
+
 
 class User(SqlAlchemyBase, UserMixin):
     __tablename__ = 'users'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, 
-                           primary_key=True, autoincrement=True)
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     nickname = sqlalchemy.Column(sqlalchemy.String, nullable=False, unique=True, index=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     surname = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    email = sqlalchemy.Column(sqlalchemy.String, 
-                              index=True, unique=True, nullable=True)
+    email = sqlalchemy.Column(sqlalchemy.String, index=True, unique=True, nullable=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    last_seen = sqlalchemy.Column(sqlalchemy.DateTime,
-                                  default=datetime.datetime.now)
+    last_seen = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     role = sqlalchemy.Column(sqlalchemy.SmallInteger, default=ROLE_USER)
-    profile_photo = sqlalchemy.Column(sqlalchemy.BLOB, default=open('/Users/eremin/Documents/GitHub/PGI/static/icons/favicon.png', "rb").read())
+
+    profile_photo = sqlalchemy.Column(sqlalchemy.BLOB)
     # Связь с таблицей Comments
     comments = orm.relation("Comments", back_populates='user')
     

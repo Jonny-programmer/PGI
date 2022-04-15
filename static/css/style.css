@@ -2,6 +2,14 @@
     margin: auto 0;
 }
 
+body {
+    background: url('../img/bg-body.jpg') center;
+}
+
+.head {
+    grid-column: 1/5;
+}
+
 
 .head_image{
     width: 100%;

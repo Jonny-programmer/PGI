@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Main page</title>
+	<title>Not main page</title>
 	<meta name="description" content="Data from UV telescope located in PGI observatory for the analysis of auroras">
     <?include($_SERVER["DOCUMENT_ROOT"]."../block/bot_block_ip.php");?>
     <!-- Смотри https://habr.com/ru/post/659811/ -->
@@ -16,41 +16,14 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" type="image/x-icon">
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
-    <script src="https://atuin.ru/demo/ui-slider/jquery-ui.min.js"></script>
-    <link rel="stylesheet" href="https://atuin.ru/demo/ui-slider/jquery-ui.css">
-    <script src="https://atuin.ru/demo/ui-slider/jquery.ui.touch-punch.min.js"></script>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/preloader.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/new_base_style.css') }}">
 </head>
 <body>
-    <script>
-    $(document).ready(function() {
-        setInterval(function() {
-            let p = $(".preloader");
-            p.css('opacity', 0);
-
-            setInterval(() => p.remove(),
-                parseInt(p.css('--duration')) * 1000
-            );
-        }, 1000);
-    });
-    </script>
-    <div class="preloader">
-        <div class="preloader__content">
-            <div class="preloader__first"></div>
-            <div class="preloader__second"></div>
-            <div class="preloader__third"></div>
-        </div>
-    </div>
-
-    <div class="wrapper">
-        <div class="head">
+     <div class="head">
             <div class="head-bar">
                <div class="user_settings" align="right">
-                   <a href="#">Home</a> |
+                   <a href="/">Home</a> |
                    {% if he.is_authenticated %}
                    <a href="{{ url_for('user', nickname=he.nickname) }}">Your Profile</a> |
                    <a href="{{ url_for('logout') }}">Logout</a>

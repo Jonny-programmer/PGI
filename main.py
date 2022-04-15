@@ -1,9 +1,11 @@
 import os
 from datetime import datetime
+from hashlib import md5
 
 import numpy as np
 import plotly
 import plotly.express as px
+import requests
 from flask import *
 from flask import Flask, render_template, redirect
 from flask import request
@@ -162,11 +164,13 @@ def reqister():
         if db_sess.query(User).filter(form.nickname.data == User.nickname).first():
             return render_template('register.html', title='Регистрация',
                                    form=form, message="Такое имя пользователя уже существует")
+        profile_img = requests.get('http://www.gravatar.com/avatar/' + md5(form.email.data.encode()).hexdigest() + '?d=identicon&s=200').content
         user = User(
             nickname=form.nickname.data,
             name=form.name.data,
             surname=form.surname.data,
             email=form.email.data,
+            profile_photo=profile_img,
         )
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -219,7 +223,9 @@ def user(nickname):
         return redirect("/")
     posts = [
         { 'author': user, 'body': 'Test post #1' },
-        { 'author': user, 'body': 'Test post #2' }
+        { 'author': user, 'body': 'Test post #2' },
+        {'author': user, 'body': 'Test post #3'},
+        {'author': user, 'body': 'Test post #4'}
     ]
     return render_template('user.html', user=user, posts=posts, he=current_user)
 

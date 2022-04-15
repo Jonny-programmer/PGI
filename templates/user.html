@@ -1,18 +1,29 @@
-{% extends "base.html" %}
+{% extends "NEW_BASE.html" %}
 
 {% block content %}
-<link rel='stylesheet' href="../static/css/user.css"/>
-<table>
-    <tr valign="top center">
-        <td><img src="{{user.avatar(128)}}"></td>
-        <td><h1>User: {{user.nickname}}</h1> {% if user.last_seen %}<p><i>Last logged in: {{user.last_seen}}</i></p>{% endif %} </td>
 
-    </tr>
-</table>
-<hr>
+<div class="block">
+    <div class="user_definition" id="text">
+    <link rel='stylesheet' href="{{ url_for('static', filename='css/user.css') }}"/>
+    <table>
+        <tr valign="top center">
+            <td>
+                <img src="{{user.avatar(128)}}">
+                <form method="post">
+                    <input type="file" name="profile_img" accept="image/*" align="center">
+                </form>
+            </td>
+            <td><h1>User: {{user.nickname}}</h1> {% if user.last_seen %}<p><i>Last logged in: {{ user.last_seen.strftime("%Y-%m-%d %H:%M:%S") }} UTC +0</i></p>{% endif %} </td>
+        </tr>
+    </table>
+    <hr>
+    </div>
+</div>
+
 {% for post in posts %}
 <table style="align: right">
     {% include "post.html" %}
 </table>
 {% endfor %}
+
 {% endblock %}

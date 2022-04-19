@@ -10,14 +10,15 @@ from flask import *
 from flask import Flask, render_template, redirect
 from flask import request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from flask_restful import Api
+# from flask_restful import Api
 from h5py import File
 from scipy import signal
 
 from data import db_session
-from data.structure import User
+from data.structure import User, Comments
 from forms.login import LoginForm
 from forms.new_user import RegisterForm
+from mail_sender import send_email
 
 file = File('./static/mat/2022-01-26-d3-nz.mat')
 
@@ -46,7 +47,7 @@ def Heatmap(frame: int, max_min_values: list):
                           x=.5, xanchor='center', bordercolor='red', borderwidth=3, ),
                       showlegend=True,
                       xaxis_title="",
-                      yaxis_title="",)
+                      yaxis_title="", )
     return fig
 
 
@@ -79,9 +80,7 @@ app.config['SECRET_KEY'] = '820b4ad02742e6630b554a48de7d2d9f'
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'users.login'
-
-api = Api(app)
-
+# api = Api(app)
 db_session.global_init("db/users.db")
 
 
@@ -142,13 +141,13 @@ def main():
 
 
 @app.route('/register', methods=['GET', 'POST'])
-def reqister():
+def register():
     form = RegisterForm()
 
     if form.validate_on_submit():
         nick_ok_letters = ["_", ".", "-"] + [str(n) for n in range(10)] + \
-        [chr(_) for _ in range(ord("A"), ord("Z") + 1)] + [chr(_) for _ in range(ord("a"), ord("z") + 1)]
-        print(nick_ok_letters)
+                          [chr(_) for _ in range(ord("A"), ord("Z") + 1)] + [chr(_) for _ in
+                                                                             range(ord("a"), ord("z") + 1)]
         for letter in form.nickname.data:
             if letter not in nick_ok_letters:
                 return render_template('register.html', title='Регистрация',
@@ -157,13 +156,16 @@ def reqister():
             return render_template('register.html', title='Регистрация',
                                    form=form, message="Пароли не совпадают")
         db_sess = db_session.create_session()
-        if db_sess.query(User).filter(User.email == form.email.data).first():
-            return render_template('register.html', title='Регистрация',
-                                   form=form, message="Учетная запись с таким почтовым адресом уже сущестует")
         if db_sess.query(User).filter(form.nickname.data == User.nickname).first():
             return render_template('register.html', title='Регистрация',
                                    form=form, message="Такое имя пользователя уже существует")
-        profile_img = requests.get('http://www.gravatar.com/avatar/' + md5(form.email.data.encode()).hexdigest() + '?d=identicon&s=200').content
+        if db_sess.query(User).filter(User.email == form.email.data).first():
+            return render_template('register.html', title='Регистрация',
+                                   form=form, message="Учетная запись с таким почтовым адресом уже сущестует")
+
+        print("-" * 50, "New user is created", "-" * 50, sep="\n")
+        profile_img = requests.get('http://www.gravatar.com/avatar/' + md5(
+            form.email.data.encode()).hexdigest() + '?d=identicon&s=200').content
         user = User(
             nickname=form.nickname.data,
             name=form.name.data,
@@ -174,6 +176,18 @@ def reqister():
         user.set_password(form.password.data)
         db_sess.add(user)
         db_sess.commit()
+
+        info = user.info()
+        link = 'http://127.0.0.1:8408/login'
+        admins = db_sess.query(User).filter(User.is_admin).all()
+        admins_mails = []
+        for admin in admins:
+            admins_mails.append(admin.email)
+
+        send_email(form.email.data, 'Confirm your registration', 'New user',
+                   f'Подтвердите свою регистрацию на сайте обсерватории PGI, перейдя по следующей ссылке: {link} \n '
+                   f'Благодаря этому теперь вы сможете писать комментарии к графикам',
+                   f'Зарегистрировался новый пользователь со следующими данными: {info}', admins_mails,  None)
         return redirect('/login')
     return render_template('register.html', title='Регистрация', form=form)
 
@@ -221,12 +235,22 @@ def user(nickname):
         flash('User ' + nickname + ' not found.')
         return redirect("/")
     posts = [
-        { 'author': user, 'body': 'Test post #1' },
-        { 'author': user, 'body': 'Test post #2' },
+        {'author': user, 'body': 'Test post #1'},
+        {'author': user, 'body': 'Test post #2'},
         {'author': user, 'body': 'Test post #3'},
         {'author': user, 'body': 'Test post #4'}
     ]
-    return render_template('user.html', user=user, posts=posts, he=current_user)
+    return render_template('user/user.html', user=user, posts=posts, he=current_user)
+
+
+@app.route('/users/admin/redact_db')
+@login_required
+def check_access():
+    if current_user.is_admin():
+        pass
+        return render_template('admin/database.html')
+    else:
+        abort(404)
 
 
 if __name__ == "__main__":

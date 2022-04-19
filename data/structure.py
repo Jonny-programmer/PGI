@@ -21,16 +21,16 @@ class User(SqlAlchemyBase, UserMixin):
     email = sqlalchemy.Column(sqlalchemy.String, index=True, unique=True, nullable=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     last_seen = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
-    role = sqlalchemy.Column(sqlalchemy.SmallInteger, default=ROLE_USER)
+    is_admin = sqlalchemy.Column(sqlalchemy.SmallInteger, default=ROLE_USER)
 
     profile_photo = sqlalchemy.Column(sqlalchemy.BLOB)
     # Связь с таблицей Comments
     comments = orm.relation("Comments", back_populates='user')
     
-    def __repr__(self):
-        return f"It is {self.name} {self.second_name} number {self.id}\
-        \n created {self.date_created}. His e-mail is {self.email}. His nickname id {self.nickname}"
-    
+    def info(self):
+        return f"\n\n Фамилия и имя: {self.name} {self.surname} \n Имя пользователя: \'{self.nickname}\' \n " \
+               f"Почтовый адрес: {self.email} \n Номер: {self.id} \n Создан: {self.last_seen}"
+
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
 

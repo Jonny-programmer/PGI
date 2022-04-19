@@ -55,11 +55,30 @@
 
 <center class="main_text"><h2>Данные с УФ-телескопа обсерватории ПГИ для исследования полярных сияний</h2></center>
 <div class="files_list" id="listing">
-    <ul class="__files__list__">
-        {% for elem in files_list %}
-        <li><a href="#">{{ elem }}</a></li>
-        {% endfor %}
-    </ul>
+    <div class="calendar-wrapper">
+    </div>
+    <script>
+        function selectDate(date) {
+          $('#calendar-wrapper').updateCalendarOptions({
+            date: date
+          });
+          console.log(calendar.getSelectedDate());
+        }
+
+
+        $('.calendar-wrapper').calendar();
+        $('.calendar-wrapper').calendar({
+            nextButton: 'Next',
+            prevButton: 'Last',
+            weekDayLength: 1,
+            onClickDate: selectDate,
+            showYearDropdown: true,
+        });
+
+
+
+    </script>
+
 </div>
 
 

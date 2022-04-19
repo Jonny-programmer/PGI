@@ -71,8 +71,7 @@ h2 {
 
 
 .files_list {
-    margin-top: 0px;
-    margin-left: 10% !important;
+    margin: 10px;
     grid-row: 3/8;
 }
 

@@ -32,16 +32,17 @@ q = 12400  # То, во сколько раз вы прорежаете масс
 a = np.zeros(q - UNIX_TIME.shape[0] + ((UNIX_TIME.shape[0] + 1) // q) * q)
 UNIX_TIME_2 = np.concatenate((UNIX_TIME, a)).reshape(-1, q)[:, 0]
 
+data_hm = file['pdm_2d_rot_global']
+max_hm = len(data_hm)
+
 
 def Heatmap(frame: int, max_min_values: list):
-    print(frame)
-    data = file['pdm_2d_rot_global']
-    array = data[frame]
+    array = data_hm[frame]
     fig = px.imshow(array, zmax=max(max_min_values), zmin=min(max_min_values), aspect='equal', origin='upper')
 
     fig.update_layout(legend_orientation="h",
                       legend=dict(
-                          title=f"This is frame number {frame} out of {len(data)} <br> timestamp is {float(UNIX_TIME[frame]):.3f} seconds",
+                          title=f"This is frame number {frame} out of {len(data_hm)} <br> timestamp is {float(UNIX_TIME[frame]):.3f} seconds",
                           x=.5, xanchor='center', bordercolor='red', borderwidth=3, ),
                       showlegend=True,
                       xaxis_title="",
@@ -105,35 +106,33 @@ def main():
             lightcurve_graph = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
             result = {'heatmap': heatmap_graph, 'keogram': keogram_graph, 'lightcurve': lightcurve_graph}
             return result
-        elif request.values.get('type') == 'heatmap_button_event':
-            current = int(request.values.get('current'))
-            changes = {'play': 2, 'next': 1, 'next2': 10, 'next3': 1000, 'last': -1, 'last2': -10, 'last3': -1000}
-            current += changes[request.values.get('pos')]
-            values = [int(request.values.get('value0')), int(request.values.get('value1'))]
-            fig = Heatmap(current, values)
-            graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-            result = {'heatmap': graphJSON, 'current': current}
-            return result
-        elif request.values.get('type') == 'heatmap_slider_event':
-            current = int(request.values.get('current'))
-            values = [int(request.values.get('value0')), int(request.values.get('value1'))]
-            fig = Heatmap(current, values)
-            graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-            result = {'heatmap': graphJSON, 'current': int(current)}
-            return result
+
         elif request.values.get('type') == 'keogram_slider_event':
             values = [int(request.values.get('value0')), int(request.values.get('value1'))]
             fig = Keogram(values)
             graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
             return graphJSON
-        elif request.values.get('type') == 'lightcurve_click_event':
-            x = float(request.values.get('x'))
-            current = np.where(UNIX_TIME_2 == x)[0][0] * q
+        elif request.values.get('type') in ['heatmap_slider_event', 'heatmap_button_event', 'lightcurve_click_event']:
+            current = 0
+            if request.values.get('type') in ['heatmap_button_event', 'heatmap_slider_event']:
+                current = int(request.values.get('current'))
+                if request.values.get('type') == 'heatmap_button_event':
+                    changes = {'play': 2, 'next': 1, 'next2': 10, 'next3': 1000, 'last': -1, 'last2': -10, 'last3': -1000}
+                    if 0 <= current + changes[request.values.get('pos')] < max_hm:
+                        current += changes[request.values.get('pos')]
+                    elif current + changes[request.values.get('pos')] < 0:
+                        current = 0
+                    elif current + changes[request.values.get('pos')] >= max_hm:
+                        current = max_hm - 1
+            else:
+                x = float(request.values.get('x'))
+                current = np.where(UNIX_TIME_2 == x)[0][0] * q
             values = [int(request.values.get('value0')), int(request.values.get('value1'))]
             fig = Heatmap(current, values)
             graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
             result = {'heatmap': graphJSON, 'current': int(current)}
             return result
+
     else:
         files_list = []
         for elem in os.listdir('static/mat/'):

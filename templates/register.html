@@ -1,90 +1,58 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>Sign up</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "register_base.html" %}
 
-		<!-- MATERIAL DESIGN ICONIC FONT -->
-		<link rel="stylesheet" href="../static/fonts/material-design-iconic-font/css/material-design-iconic-font.min.css">
-
-		<!-- EXO 2 FONT -->
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-		
-		<!-- STYLE CSS -->
-		<link rel="stylesheet" href="../static/css/reg_style.css">
-		<!-- Libraries -->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
-
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    </head>
-
-	<body>
-		<div class="wrapper" style="background-image: url('../static/img/bg-registration-form-2_2.jpg');">
-			<div class="inner">
-				<form action="" method="post" name='fromValidation' id='fromValidation'>
-					{{ form.hidden_tag() }}
-					<h3>Регистрация</h3>
-					<div class="form-wrapper">
-						{{ form.nickname.label }}
-						{{ form.nickname(type="text", class="form-control", id="nickname") }}
-					</div>
-					<div class="form-group">
-						<div class="form-wrapper">
-                            {{ form.name.label }}
-							{{ form.name(type="text", class="form-control", id='name') }}
-						</div>
-						<div class="form-wrapper">
-                            {{ form.surname.label }}
-							{{ form.surname(id='sec_name', type="text", class="form-control") }}
-						</div>
-					</div>
-					<div class="form-wrapper">
-						{{ form.email.label }}
-						{{ form.email(class="form-control", type="email", id="email", autocomplete='off') }}
-						{% for error in form.email.errors %}
-							<p class="alert alert-danger" role="alert" style="color:red">
-								{{ error }}
-							</p>
-						{% endfor %}
-					</div>
-					<div class="form-wrapper">
-						{{ form.password.label }}
-						{{ form.password(type="password", class="form-control", id="pass1", autocomplete="off") }}
-						{% for error in form.password.errors %}
-							<p class="alert alert-danger" role="alert" style="color:red">
-                				{{ error }}
-							</p>
-						{% endfor %}
-					</div>
-					<div class="form-wrapper">
-						{{ form.password_again.label }}
-						{{ form.password_again(id='pass2', type="password", class="form-control") }}
-						{% for error in form.password_again.errors %}
-							<p class="alert alert-danger" role="alert" style="color:red">
-								{{ error }}
-							</p>
-        				{% endfor %}
-						<div class="error_msg" style="color:red">
-							{{ message }}
-						</div>
-					</div>
-					<div class="checkbox">
-						Регистрируясь, вы подтверждаете, что ваши данные занесены корректно <br>
-						и что вы готовы поделиться ими с администратором
-					</div>
-					<div class='text-center'>
-
-						<button type="submit" id="submit">Создать аккаунт</button>
-					</div>
-				</form>
-			</div>
+{% block content %}
+	{{ form.hidden_tag() }}
+	<h3>Регистрация</h3>
+	<div class="form-wrapper">
+		{{ form.nickname.label }}
+		{{ form.nickname(type="text", class="form-control", id="nickname") }}
+	</div>
+	<div class="form-group">
+		<div class="form-wrapper">
+			{{ form.name.label }}
+			{{ form.name(type="text", class="form-control", id='name') }}
 		</div>
-	</body>
-</html>
+		<div class="form-wrapper">
+			{{ form.surname.label }}
+			{{ form.surname(id='sec_name', type="text", class="form-control") }}
+		</div>
+	</div>
+	<div class="form-wrapper">
+		{{ form.email.label }}
+		{{ form.email(class="form-control", type="email", id="email", autocomplete='off') }}
+		{% for error in form.email.errors %}
+			<p class="alert alert-danger" role="alert" style="color:red">
+				{{ error }}
+			</p>
+		{% endfor %}
+	</div>
+	<div class="form-wrapper">
+		{{ form.password.label }}
+		{{ form.password(type="password", class="form-control", id="pass1", autocomplete="off") }}
+		{% for error in form.password.errors %}
+			<p class="alert alert-danger" role="alert" style="color:red">
+				{{ error }}
+			</p>
+		{% endfor %}
+	</div>
+	<div class="form-wrapper">
+		{{ form.password_again.label }}
+		{{ form.password_again(id='pass2', type="password", class="form-control") }}
+		{% for error in form.password_again.errors %}
+			<p class="alert alert-danger" role="alert" style="color:red">
+				{{ error }}
+			</p>
+		{% endfor %}
+		<div class="error_msg" style="color:red">
+			{{ message }}
+		</div>
+	</div>
+	<div class="checkbox">
+		Регистрируясь, вы подтверждаете, что ваши данные занесены корректно <br>
+		и что вы готовы поделиться ими с администратором
+	</div>
+	<div class='text-center'>
+		<button type="submit" id="submit">Создать аккаунт</button>
+	</div>
+
+{% endblock %}

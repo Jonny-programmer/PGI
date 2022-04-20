@@ -18,7 +18,7 @@ return_button_func = function (name){
 
     window.funcSucces = function(data) {
         window.current = data['current']
-        $("#text_id").html('You are on the frame number ' + window.current)
+        $("#text_id").html(data['title'])
         $("#heatmap_graph").remove();
         $('<div>', {
             id: 'heatmap_graph'
@@ -30,10 +30,11 @@ return_button_func = function (name){
     function firstSuccess(data){
         let heatmap_graph = JSON.parse(data['heatmap']);
         let keogramm_graph = JSON.parse(data['keogram']);
-        let lightcurve_graph = JSON.parse(data['lightcurve']);
-        Plotly.plot('lightcurve_graph', lightcurve_graph, {})
         Plotly.plot('keogram_graph', keogramm_graph, {});
         Plotly.plot('heatmap_graph', heatmap_graph, {});
+
+        let lightcurve_graph = JSON.parse(data['lightcurve']);
+        Plotly.plot('lightcurve_graph', lightcurve_graph, {});
 
         lightcurve = document.getElementById('lightcurve_graph')
 

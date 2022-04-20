@@ -1,4 +1,4 @@
-{% extends "../NEW_BASE.html" %}
+{% extends "NEW_BASE.html" %}
 
 {% block content %}
 
@@ -22,7 +22,7 @@
 
 {% for post in posts %}
 <table style="align: right">
-    {% include "post.html" %}
+    {% include "user/post.html" %}
 </table>
 {% endfor %}
 

@@ -1,6 +1,15 @@
+import mimetypes
 import os
+import smtplib
 from datetime import datetime
+from email import encoders
+from email.mime.audio import MIMEAudio
+from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from hashlib import md5
+from threading import Thread
 
 import numpy as np
 import plotly
@@ -10,15 +19,100 @@ from flask import *
 from flask import Flask, render_template, redirect
 from flask import request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-# from flask_restful import Api
+from flask_mail import Mail
 from h5py import File
 from scipy import signal
+from waitress import serve
 
 from data import db_session
-from data.structure import User, Comments
+from data.structure import User, Comments, Email_services
+from forms.forgot_password import ResetPasswordRequestForm
 from forms.login import LoginForm
 from forms.new_user import RegisterForm
-from mail_sender import send_email
+from forms.reset_password_form import ResetPasswordForm
+
+# Main app definition
+app = Flask(__name__, template_folder='templates')
+app.config.from_pyfile('config.py')
+# Additions:
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'users.login'
+mail = Mail(app)
+
+db_session.global_init("db/users.db")
+
+
+def send_async_email(app, msg):
+    with app.app_context():
+        addr_from = os.getenv("FROM")
+        password = os.getenv("PASSWORD")
+
+        server = smtplib.SMTP_SSL(os.getenv("HOST"), os.getenv("PORT"))
+        server.login(addr_from, password)
+
+        server.send_message(msg)
+        server.quit()
+
+
+def send_email(recipients, subject, plain_text=None, html_text=None, attachments=None):
+    addr_from = os.getenv("FROM")
+    for email in recipients:
+        msg = MIMEMultipart()
+        msg['From'] = addr_from
+        msg['To'] = email
+        msg['Subject'] = subject
+        if html_text:
+            msg.attach(MIMEText(html_text, 'html'))
+        if plain_text:
+            msg.attach(MIMEText(plain_text, 'plain'))
+        if attachments:
+            process_attachments(msg, attachments)
+        try:
+            Thread(target=send_async_email, args=(app, msg)).start()
+        except:
+            return
+
+
+def attach_file(msg, f):
+    attach_types = {
+        'text': MIMEText,
+        'image': MIMEImage,
+        'audio': MIMEAudio,
+    }
+    filename = os.path.basename(f)
+    ctype, encoding = mimetypes.guess_type(f)
+    if ctype is None or encoding is not None:
+        ctype = 'application/octet-stream'
+    maintype, subtype = ctype.split('/', 1)
+
+    with open(f, mode='rb' if maintype != 'text' else 'r') as fp:
+        if maintype in attach_types:
+            file = attach_types[maintype](fp.read(), _subtype=subtype)
+        else:
+            file = MIMEBase(maintype, subtype)
+            file.set_payload(fp.read())
+            encoders.encode_base64(file)
+        file.add_header('Content-Disposition', 'attachment', filename=filename)
+        msg.attach(file)
+
+
+def process_attachments(msg, attachments):
+    for f in attachments:
+        if os.path.isfile(f):
+            attach_file(msg, f)
+        elif os.path.exists(f):
+            dir = os.listdir(f)
+            for file in dir:
+                attach_file(msg, f + '/' + file)
+
+
+def send_password_reset_email(user):
+    token = user.get_reset_password_token()
+    send_email([user.email], '[PGI] Reset Your Password',
+               html_text=render_template('email/reset_password.html',
+                                         user=user, token=token))
+
 
 file = File('./static/mat/2022-01-26-d3-nz.mat')
 
@@ -32,7 +126,6 @@ UNIX_TIME = np.concatenate(unix_time)
 q = 12400  # То, во сколько раз вы прорежаете массив (берете каждый q-й элемент)
 a = np.zeros(q - UNIX_TIME.shape[0] + ((UNIX_TIME.shape[0] + 1) // q) * q)
 UNIX_TIME_2 = np.concatenate((UNIX_TIME, a)).reshape(-1, q)[:, 0]
-
 data_hm = file['pdm_2d_rot_global']
 max_hm = len(data_hm)
 
@@ -42,10 +135,7 @@ def Heatmap(frame: int, max_min_values: list):
     fig = px.imshow(array, zmax=max(max_min_values), zmin=min(max_min_values), aspect='equal', origin='upper')
 
     fig.update_layout(legend_orientation="h",
-                      legend=dict(
-                          title=f"This is frame number {frame} out of {len(data_hm)} <br> timestamp is {float(UNIX_TIME[frame]):.3f} seconds",
-                          x=.5, xanchor='center', bordercolor='red', borderwidth=3, ),
-                      showlegend=True,
+                      showlegend=False,
                       xaxis_title="",
                       yaxis_title="", )
     return fig
@@ -68,20 +158,42 @@ def Light_curve():
     light_curve = file['lightcurvesum_global']
     y2 = np.concatenate(light_curve)
     light_curve_2 = signal.decimate(y2, q=q, ftype='fir', n=8)
+
     fig = px.line(x=UNIX_TIME_2, y=light_curve_2)
+    # fig = px.line(x=UNIX_TIME_2, y=light_curve_2)
+    fig.update_traces(mode="markers+lines",
+
+                      hovertemplate='<i>Value</i>: %{y:.2f}' +
+                                    '<br><b>Time</b>: %{x:.0f}<br>' +
+                                    '<br><b>Hello there</b>',
+                      text=['Custom text {}'.format(i + 1) for i in range(5)],
+
+                      showlegend=False)
+    fig.update_layout(hovermode="x unified")
+
     fig.update_layout(legend_orientation="h",
                       legend=dict(x=.5, xanchor="center"),
-                      xaxis_title="Time", yaxis_title="Intensity", )
+                      xaxis_title="Time", yaxis_title="Intensity",
+                      )
     return fig
 
 
-app = Flask(__name__, template_folder='templates')
-app.config['SECRET_KEY'] = '820b4ad02742e6630b554a48de7d2d9f'
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'users.login'
-# api = Api(app)
-db_session.global_init("db/users.db")
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    db_sess = db_session.create_session()
+    if current_user.is_authenticated:
+        return redirect(url_for('main'))
+    user_id = User.verify_reset_password_token(token)
+    curr_user = db_sess.query(User).filter(User.id == user_id).first()
+    if not curr_user:
+        return redirect(url_for('main'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        curr_user.set_password(form.password.data)
+        db_sess.commit()
+        flash('Your password has been reset.')
+        return redirect(url_for('login'))
+    return render_template('reset_password.html', form=form)
 
 
 @login_manager.user_loader
@@ -116,7 +228,8 @@ def main():
             if request.values.get('type') in ['heatmap_button_event', 'heatmap_slider_event']:
                 current = int(request.values.get('current'))
                 if request.values.get('type') == 'heatmap_button_event':
-                    changes = {'play': 2, 'next': 1, 'next2': 10, 'next3': 1000, 'last': -1, 'last2': -10, 'last3': -1000}
+                    changes = {'play': 2, 'next': 1, 'next2': 10, 'next3': 1000, 'last': -1, 'last2': -10,
+                               'last3': -1000}
                     if 0 <= current + changes[request.values.get('pos')] < max_hm:
                         current += changes[request.values.get('pos')]
                     elif current + changes[request.values.get('pos')] < 0:
@@ -129,7 +242,9 @@ def main():
             values = [int(request.values.get('value0')), int(request.values.get('value1'))]
             fig = Heatmap(current, values)
             graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-            result = {'heatmap': graphJSON, 'current': int(current)}
+            result = {'heatmap': graphJSON, 'current': int(current),
+                      'title': f"This is frame number {int(current) + 1} out of {len(data_hm)} <br>"
+                               f" timestamp is {float(UNIX_TIME[int(current)]):.3f} UNIX", }
             return result
 
     else:
@@ -178,16 +293,13 @@ def register():
         db_sess.commit()
 
         info = user.info()
-        link = 'http://127.0.0.1:8408/login'
         admins = db_sess.query(User).filter(User.is_admin).all()
-        admins_mails = []
-        for admin in admins:
-            admins_mails.append(admin.email)
-
-        send_email(form.email.data, 'Confirm your registration', 'New user',
-                   f'Подтвердите свою регистрацию на сайте обсерватории PGI, перейдя по следующей ссылке: {link} \n '
-                   f'Благодаря этому теперь вы сможете писать комментарии к графикам',
-                   f'Зарегистрировался новый пользователь со следующими данными: {info}', admins_mails,  None)
+        admin_mails = [_.email for _ in admins]
+        try:
+            send_email(admin_mails, '[PGI] New user',
+                       plain_text=f'Зарегистрировался новый пользователь со следующими данными: {info}')
+        except:
+            pass
         return redirect('/login')
     return render_template('register.html', title='Регистрация', form=form)
 
@@ -212,6 +324,40 @@ def login():
                                message="Неправильный логин или пароль",
                                form=form)
     return render_template('login.html', title='Авторизация', form=form)
+
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def reset_password_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('main'))
+    form = ResetPasswordRequestForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        curr_user = db_sess.query(User).filter_by(email=form.nick.data).first()
+        if not curr_user:
+            curr_user = db_sess.query(User).filter_by(nickname=form.nick.data).first()
+        if curr_user:
+            send_password_reset_email(curr_user)
+        else:
+            return render_template('reset_password_request.html',
+                                   title='Reset Password', form=form,
+                                   message="Пользователь не существует")
+        flash('Check your email for the instructions to reset your password')
+        return redirect(f'/forgot_password/ok/{curr_user.nickname}')
+    return render_template('reset_password_request.html',
+                           title='Reset Password', form=form)
+
+
+@app.route('/forgot_password/ok/<nickname>')
+def okay(nickname):
+    db_sess = db_session.create_session()
+    curr_user = db_sess.query(User).filter(User.nickname == nickname).first()
+    email = curr_user.email
+    domain = email.split("@")[1]
+    service = db_sess.query(Email_services).filter(Email_services.domain == domain).first()
+
+    flash('Мы отправили вам письмо. Пожалуйста, проверьте вашу почту')
+    return render_template('we_sent_email.html', service=service)
 
 
 @app.route('/logout')
@@ -243,15 +389,6 @@ def user(nickname):
     return render_template('user/user.html', user=user, posts=posts, he=current_user)
 
 
-@app.route('/users/admin/redact_db')
-@login_required
-def check_access():
-    if current_user.is_admin():
-        pass
-        return render_template('admin/database.html')
-    else:
-        abort(404)
-
-
 if __name__ == "__main__":
-    app.run(port=8408, debug=True)
+    # app.run('0.0.0.0', port=5000, debug=True)
+    serve(app, host='0.0.0.0', port=5000)

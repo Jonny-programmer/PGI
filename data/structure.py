@@ -1,11 +1,14 @@
 import datetime
+from hashlib import md5
 
+import jwt
 import sqlalchemy
-from .db_session import SqlAlchemyBase
+from flask_login import UserMixin
 from sqlalchemy import orm
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
-from hashlib import md5
+
+from config import SECRET_KEY
+from .db_session import SqlAlchemyBase
 
 ROLE_USER = 0
 ROLE_ADMIN = 1
@@ -40,6 +43,20 @@ class User(SqlAlchemyBase, UserMixin):
     def avatar(self, size):
         return 'http://www.gravatar.com/avatar/' + md5(self.email.encode()).hexdigest() + '?d=identicon&s=' + str(size)
 
+    def get_reset_password_token(self, expires_in=600):
+        from time import time
+        return jwt.encode({'reset_password': self.id, 'exp': time() + expires_in},
+                          SECRET_KEY, algorithm='HS256')
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            user_id = jwt.decode(token, SECRET_KEY,
+                                 algorithms=['HS256'])['reset_password']
+        except:
+            return
+        return user_id
+
 
 class Comments(SqlAlchemyBase):
     __tablename__ = 'comments'
@@ -56,3 +73,11 @@ class Comments(SqlAlchemyBase):
     # Свящь с таблицей Users
     user = orm.relation('User')
 
+
+class Email_services(SqlAlchemyBase):
+    __tablename__ = 'email_services'
+
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
+    domain = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    url = sqlalchemy.Column(sqlalchemy.String, nullable=False)

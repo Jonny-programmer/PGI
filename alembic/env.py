@@ -1,9 +1,8 @@
 from logging.config import fileConfig
-from data.db_session import SqlAlchemyBase
-import data.__all_models
+
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-import sys
+
 from alembic import context
 
 # this is the Alembic Config object, which provides
@@ -19,7 +18,13 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-sys.path.insert(0, '../')
+import sys
+sys.path.insert(0, '~/Documents/Github/PGI/')
+# Прости, Эмиль, у меня без этого не работают мутации
+# Загрузим на сервер, исправим
+from data.db_session import SqlAlchemyBase
+import data.__all_models
+
 target_metadata = SqlAlchemyBase.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -46,7 +51,6 @@ def run_migrations_offline():
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        include_schemas=True,
     )
 
     with context.begin_transaction():
@@ -68,9 +72,7 @@ def run_migrations_online():
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
-            include_schemas=True,
+            connection=connection, target_metadata=target_metadata
         )
 
         with context.begin_transaction():

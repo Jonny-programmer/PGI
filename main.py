@@ -240,6 +240,9 @@ def main():
                 x = float(request.values.get('x'))
                 current = np.where(UNIX_TIME_2 == x)[0][0] * q
             values = [int(request.values.get('value0')), int(request.values.get('value1'))]
+            print(request.values.get('is_auto'))
+            if request.values.get('is_auto') == 'true':
+                values = [0, 0]
             fig = Heatmap(current, values)
             graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
             result = {'heatmap': graphJSON, 'current': int(current),
@@ -390,5 +393,5 @@ def user(nickname):
 
 
 if __name__ == "__main__":
-    # app.run('0.0.0.0', port=5000, debug=True)
-    serve(app, host='0.0.0.0', port=5000)
+    app.run('0.0.0.0', port=5000, debug=True)
+    # serve(app, host='0.0.0.0', port=5000)

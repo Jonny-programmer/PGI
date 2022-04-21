@@ -17,6 +17,9 @@ $( ".ui-slider-vertical" ).slider({
 
         $( "#heatmap_slider" ).slider({
             stop: function( event, ui ) {
+
+            window.is_heatmap_autoscale = false;
+
             window.value_heatmap0 = ui.values[0];
             window.value_heatmap1 = ui.values[1];
             $.ajax({
@@ -26,7 +29,8 @@ $( ".ui-slider-vertical" ).slider({
                         type: 'heatmap_slider_event',
                         value0: ui.values[0],
                         value1: ui.values[1],
-                        current: window.current
+                        current: window.current,
+                        is_auto: window.is_heatmap_autoscale
                     }),
                     datatype: 'text',
                     success: window.funcSucces

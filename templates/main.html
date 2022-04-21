@@ -40,7 +40,8 @@
                     current: window.current,
                     pos: 'play',
                     value0: window.value_heatmap0,
-                    value1: window.value_heatmap1
+                    value1: window.value_heatmap1,
+                    is_auto: window.is_heatmap_autoscale
                 }),
                 datatype: 'text',
                 success: window.funcSucces
@@ -85,12 +86,15 @@
 <div class="block">
     <h1>Light Curve</h1>
 
-    <div id="lightcurve" class="lightcurve">
-        <div id="lightcurve_graph">
+    <div class="something_and_slider">
+        <div id="lightcurve" class="lightcurve">
+            <div id="lightcurve_graph">
+            </div>
         </div>
+        <div></div>
+        <div></div>
     </div>
 </div>
-
 
 <div class="block">
     <h1>Keogramm</h1>
@@ -99,14 +103,37 @@
             <div id="keogram_graph">
             </div>
         </div>
-
+        <div>
+        </div>
         <div>
             <div id="keogram_slider" class="ui-slider-vertical"></div>
             <div id="first_keogram_text" class="slider_text">a</div>
             <div id="second_keogram_text" class="slider_text">a</div>
-        </div>
-        <div>
-            <a class="btn btn-primary" id="autoscale_keogramm">Autoscale</a>
+            <div class="autoscale_button" id="autoscale_keogramm">
+                <button class="btn btn-primary">Autoscale</button>
+                <script>
+                        let top_pos = $(" #keogram_slider ").height() + $(" #keogram_slider ").position().top + $(" #autoscale_keogramm ").height();
+                        let left_pos = $(" #keogram_slider ").position().left - $(" #autoscale_keogramm ").width() * 2 / 3;
+                        $(" #autoscale_keogramm ").offset({top: top_pos, left: left_pos});
+
+                        $(document).ready(function () {
+                            $("#autoscale_keogramm").bind("click",
+                            function(){
+                                $.ajax({
+                                    url: "/",
+                                    type: 'POST',
+                                    data: ({
+                                        type: 'keogram_slider_event',
+                                        value0: 0,
+                                        value1: 0,
+                                    }),
+                                    datatype: 'text',
+                                    success: keogram_success
+                                })
+                            });
+                            })
+                </script>
+            </div>
         </div>
     </div>
 
@@ -126,9 +153,36 @@
             <div id="heatmap_slider" class="ui-slider-vertical"></div>
             <div id="first_heatmap_text" class="slider_text">a</div>
             <div id="second_heatmap_text" class="slider_text">a</div>
-        </div>
-        <div>
-            <a class="btn btn-primary" id="autoscale_frame">Autoscale</a>
+            <div class="autoscale_button" id="autoscale_heatmap">
+                <button class="btn btn-primary">Autoscale</button>
+                <script>
+                        let top_pos2 = $(" #heatmap_slider ").height() + $(" #heatmap_slider ").position().top + $(" #autoscale_heatmap ").height();
+                        let left_pos2 = $(" #heatmap_slider ").position().left - $(" #autoscale_heatmap ").width() * 2 / 3;
+                        $(" #autoscale_heatmap ").offset({top: top_pos2, left: left_pos2});
+
+                        $(document).ready(function () {
+                            $("#autoscale_heatmap").bind("click",
+                            function(){
+
+                                window.is_heatmap_autoscale = true;
+
+                                $.ajax({
+                                    url: "/",
+                                    type: 'POST',
+                                    data: ({
+                                        type: 'heatmap_slider_event',
+                                        value0: 0,
+                                        value1: 0,
+                                        current: window.current,
+                                        is_auto: window.is_heatmap_autoscale
+                                    }),
+                                    datatype: 'text',
+                                    success: window.funcSucces
+                                })
+                            });
+                            })
+                </script>
+            </div>
         </div>
     </div>
     <script>

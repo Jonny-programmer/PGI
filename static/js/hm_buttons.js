@@ -8,7 +8,8 @@ return_button_func = function (name){
                     current: window.current,
                     pos: name,
                     value0: window.value_heatmap0,
-                    value1: window.value_heatmap1
+                    value1: window.value_heatmap1,
+                    is_auto: window.is_heatmap_autoscale
                 }),
                 datatype: 'text',
                 success: window.funcSucces
@@ -47,7 +48,8 @@ return_button_func = function (name){
                     type: 'lightcurve_click_event',
                     x: x,
                     value0: window.value_heatmap0,
-                    value1: window.value_heatmap1
+                    value1: window.value_heatmap1,
+                    is_auto: window.is_heatmap_autoscale
                 }),
                 datatype: 'text',
                 success: window.funcSucces
@@ -64,3 +66,5 @@ return_button_func = function (name){
         $("#last2").bind("click", return_button_func('last2'))
         $("#last3").bind("click", return_button_func('last3'))
     })
+
+window.is_heatmap_autoscale = false;

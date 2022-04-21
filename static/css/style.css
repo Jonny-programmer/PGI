@@ -241,3 +241,7 @@ a {
     border: 2px solid #8B00FF;
     border-radius: 7px;
 }
+
+.autoscale_button{
+    position: relative;
+}

@@ -4,7 +4,7 @@
 
 [Data files](https://disk.yandex.ru/d/YRy6chw4OumnOw)
 
-> Download all the files directly in the /data folder, they are already added to .gitignore
+> Download all the files directly in the /static/mat/ folder, they are already added to .gitignore
 
 2) Usage example:
 

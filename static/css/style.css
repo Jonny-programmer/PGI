@@ -166,6 +166,12 @@ a {
     grid-template-columns: 92% 3% 5%;
 }
 
+.personal_lightcurve_class{
+    display: grid;
+    grid-template-columns: 89% 9% 2%;
+}
+
+
 .ui-slider-vertical {
     min-height: 450px;
 }

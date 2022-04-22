@@ -163,10 +163,10 @@ def Light_curve():
     # fig = px.line(x=UNIX_TIME_2, y=light_curve_2)
     fig.update_traces(mode="markers+lines",
 
-                      hovertemplate='<i>Value</i>: %{y:.2f}' +
-                                    '<br><b>Time</b>: %{x:.0f}<br>' +
-                                    '<br><b>Hello there</b>',
-                      text=['Custom text {}'.format(i + 1) for i in range(5)],
+                      # hovertemplate='<i>Value</i>: %{y:.2f}' +
+                      #               '<br><b>Time</b>: %{x:.0f}<br>' +
+                      #               '<br><b>Hello there</b>',
+                      # text=['Custom text {}'.format(i + 1) for i in range(5)],
 
                       showlegend=False)
     fig.update_layout(hovermode="x unified")

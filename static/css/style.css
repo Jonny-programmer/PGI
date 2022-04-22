@@ -245,3 +245,8 @@ a {
 .autoscale_button{
     position: relative;
 }
+
+
+.empty-date{
+    color: #000;
+}

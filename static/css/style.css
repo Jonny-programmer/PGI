@@ -73,6 +73,7 @@ h2 {
 .files_list {
     margin: 10px;
     grid-row: 3/8;
+    background-color: #0000 !important;
 }
 
 a {
@@ -141,6 +142,7 @@ a {
     text-align: center;
     margin-right: 3% !important;
     grid-auto-rows: minmax(100px, auto);
+    display: none;
 
 }
 
@@ -255,4 +257,15 @@ a {
 
 .empty-date{
     color: #000;
+}
+
+.calendar-wrapper{
+    padding: 10px;
+    background-color: gainsboro;
+}
+
+.has-event{
+    color: green;
+    font-weight: bold;
+    background-color: #00FF0055
 }

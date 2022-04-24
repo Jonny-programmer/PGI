@@ -39,7 +39,6 @@ load_dotenv()
 SMTP_HOST: str = os.environ["HOST"]
 SMTP_PORT: int = int(os.environ["PORT"])
 
-
 # Main app definition
 app = Flask(__name__, template_folder='templates')
 app.config.from_pyfile('config.py')
@@ -49,11 +48,10 @@ login_manager.init_app(app)
 login_manager.login_view = 'users.login'
 mail = Mail(app)
 
-
-server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
-addr_from = os.getenv("FROM")
-password = os.getenv("PASSWORD")
-server.login(addr_from, password)
+# server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
+# addr_from = os.getenv("FROM")
+# password = os.getenv("PASSWORD")
+# server.login(addr_from, password)
 
 db_session.global_init("db/users.db")
 
@@ -122,22 +120,6 @@ def send_password_reset_email(user):
                                          user=user, token=token))
 
 
-file = File('./static/mat/2022-01-26-d3-nz.mat')
-
-unix_time = file['unixtime_global']
-
-last = np.add(unix_time[-1], 5)
-unix_time = np.append(unix_time, last)
-unix_time = [np.linspace(unix_time[i], unix_time[i + 1], 128) for i in range(len(unix_time) - 1)]
-UNIX_TIME = np.ravel(unix_time)
-
-q = 12400  # То, во сколько раз вы прорежаете массив (берете каждый q-й элемент)
-a = np.zeros(q - UNIX_TIME.shape[0] + ((UNIX_TIME.shape[0] + 1) // q) * q)
-UNIX_TIME_2 = np.concatenate((UNIX_TIME, a)).reshape(-1, q)[:, 0]
-data_hm = file['pdm_2d_rot_global']
-max_hm = len(data_hm)
-
-
 def Heatmap(frame: int, max_min_values: list):
     array = data_hm[frame]
     fig = px.imshow(array, zmax=max(max_min_values), zmin=min(max_min_values), aspect='equal', origin='upper')
@@ -184,7 +166,7 @@ def Light_curve():
     # fig = px.line(x=UNIX_TIME_2, y=light_curve_2)
     fig.update_traces(mode="markers+lines",
                       hovertemplate='<i>Value</i>: %{y:.2f}' +
-                                    '<br><b>Time</b>: %{x:.2f}}<br>' +
+                                    '<br><b>Time</b>: %{x:.2f}<br>' +
                                     '<br><b>Hello there</b>',
                       showlegend=False)
     fig.update_layout(hovermode="x unified")
@@ -224,6 +206,7 @@ def load_user(user_id):
 
 @app.route("/", methods=["GET", "POST"])
 def main():
+    global file, unix_time, UNIX_TIME, UNIX_TIME_2, q, data_hm, max_hm
     # db_sess = db_session.create_session()
     # here we can use
     # if current_user.is_authenticated:
@@ -269,6 +252,45 @@ def main():
                       'title': f"This is frame number {int(current) + 1} out of {len(data_hm)} <br>"
                                f" timestamp is {float(UNIX_TIME[int(current)]):.3f} UNIX", }
             return result
+
+        elif request.values.get('type') == 'date_event':
+            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',
+                      'Nov', 'Dec']
+            date = request.values.get('date').split()
+
+            def to_date(date):
+                return '0' * (2 - len(str(date))) + str(date)
+
+            filename = f'{date[-1]}-{to_date(months.index(date[1]) + 1)}-{to_date(date[2])}-d3.mat'
+            print(filename)
+
+            file = File(f'./static/mat/{filename}')
+
+            unix_time = file['unixtime_global']
+
+            last = np.add(unix_time[-1], 5)
+            unix_time = np.append(unix_time, last)
+            unix_time = [np.linspace(unix_time[i], unix_time[i + 1], 128) for i in range(len(unix_time) - 1)]
+            UNIX_TIME = np.ravel(unix_time)
+
+            q = 6200  # То, во сколько раз вы прорежаете массив (берете каждый q-й элемент)
+            a = np.zeros(q - UNIX_TIME.shape[0] + ((UNIX_TIME.shape[0] + 1) // q) * q)
+            UNIX_TIME_2 = np.concatenate((UNIX_TIME, a)).reshape(-1, q)[:, 0]
+            data_hm = file['pdm_2d_rot_global']
+            max_hm = len(data_hm)
+            return 'sfgdfg'
+
+        elif request.values.get('type') == 'get_date_list':
+
+            date_list = []
+
+            for elem in os.listdir('./static/mat'):
+                elem = elem.split('-')
+                tpl = (elem[2], elem[1], elem[0])
+                date_list.append(tpl)
+
+            return {'data': tuple(date_list)}
+
 
     else:
         files_list = []

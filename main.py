@@ -1,7 +1,10 @@
+import base64
 import mimetypes
 import os
 import smtplib
-from pprint import pprint
+import string
+from random import random
+import random
 
 import time
 from datetime import datetime
@@ -23,7 +26,6 @@ from flask import *
 from flask import Flask, render_template, redirect
 from flask import request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from flask_mail import Mail
 from h5py import File
 from scipy import signal
 from waitress import serve
@@ -33,12 +35,14 @@ from data.structure import User, Comments, Email_services
 from forms.forgot_password import ResetPasswordRequestForm
 from forms.login import LoginForm
 from forms.new_user import RegisterForm
+from forms.profile_redact import UpdateAccountForm
 from forms.reset_password_form import ResetPasswordForm
+from human_readable_file_size import human_readable_file_size
 
+server = False
 load_dotenv()
 SMTP_HOST: str = os.environ["HOST"]
 SMTP_PORT: int = int(os.environ["PORT"])
-
 
 # Main app definition
 app = Flask(__name__, template_folder='templates')
@@ -47,13 +51,16 @@ app.config.from_pyfile('config.py')
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'users.login'
-mail = Mail(app)
 
 
-server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
-addr_from = os.getenv("FROM")
-password = os.getenv("PASSWORD")
-server.login(addr_from, password)
+def create_mail_server():
+    global server
+    server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
+    addr_from = os.getenv("FROM")
+    password = os.getenv("PASSWORD")
+    server.connect(SMTP_HOST, SMTP_PORT)
+    server.login(addr_from, password)
+
 
 db_session.global_init("db/users.db")
 
@@ -64,6 +71,8 @@ def send_async_email(app, msg):
 
 
 def send_email(recipients, subject, plain_text=None, html_text=None, attachments=None):
+    if not server:
+        create_mail_server()
     addr_from = os.getenv("FROM")
     for email in recipients:
         msg = MIMEMultipart()
@@ -131,11 +140,16 @@ unix_time = np.append(unix_time, last)
 unix_time = [np.linspace(unix_time[i], unix_time[i + 1], 128) for i in range(len(unix_time) - 1)]
 UNIX_TIME = np.ravel(unix_time)
 
-q = 12400  # То, во сколько раз вы прорежаете массив (берете каждый q-й элемент)
+q = 100  # То, во сколько раз вы прорежаете массив (берете каждый q-й элемент)
 a = np.zeros(q - UNIX_TIME.shape[0] + ((UNIX_TIME.shape[0] + 1) // q) * q)
 UNIX_TIME_2 = np.concatenate((UNIX_TIME, a)).reshape(-1, q)[:, 0]
 data_hm = file['pdm_2d_rot_global']
 max_hm = len(data_hm)
+
+
+def convert_from_UNIX(timestamp: float):
+    date = datetime.fromtimestamp(timestamp)
+    return date.strftime('%d/%m/%Y %H:%M:%S.%f')
 
 
 def Heatmap(frame: int, max_min_values: list):
@@ -145,46 +159,30 @@ def Heatmap(frame: int, max_min_values: list):
     fig.update_layout(legend_orientation="h",
                       showlegend=False,
                       xaxis_title="",
-                      yaxis_title="", )
+                      yaxis_title="",)
     return fig
 
 
 def Keogram(max_min_values: list):
-    t0 = time.time()
-
     diag_global = file["diag_global"]
     diag_global = np.rot90(diag_global)
-    t1 = time.time()
     diag_global_2 = signal.decimate(diag_global, q=q, ftype='fir')
-    print(f"---> Decimated in {(time.time() - t1)} seconds")
 
     fig = px.imshow(diag_global_2, x=UNIX_TIME_2, zmax=max(max_min_values), zmin=min(max_min_values), aspect='auto')
-
-    fig.update_layout()
-    print(f"---> Created Keogramm: {time.time() - t0} seconds")
-
+    fig.update_layout(hovermode="x unified",)
+    fig.update_traces(hovertemplate='')
     return fig
 
 
 def Light_curve():
-    t0 = time.time()
-    t1 = time.time()
     light_curve = file['lightcurvesum_global']
-    print(f"Got data from file in {(time.time() - t1)} seconds")
-    t1 = time.time()
     y2 = np.ravel(light_curve)
-    print(f"Concatenated in {(time.time() - t1)} seconds")
-    t1 = time.time()
     light_curve_2 = signal.decimate(y2, q=q, ftype='fir', n=8)
-    print(f"Decimated in {(time.time() - t1)} seconds")
-    t1 = time.time()
     fig = px.line(x=UNIX_TIME_2, y=light_curve_2)
-    print(f"Created plotly figure in {(time.time() - t1)} seconds")
-    t1 = time.time()
-    # fig = px.line(x=UNIX_TIME_2, y=light_curve_2)
+
     fig.update_traces(mode="markers+lines",
                       hovertemplate='<i>Value</i>: %{y:.2f}' +
-                                    '<br><b>Time</b>: %{x:.2f}}<br>' +
+                                    '<br><b>Time</b>: %{x:.3f} <br>' +
                                     '<br><b>Hello there</b>',
                       showlegend=False)
     fig.update_layout(hovermode="x unified")
@@ -192,9 +190,6 @@ def Light_curve():
                       legend=dict(x=.5, xanchor="center"),
                       xaxis_title="Time", yaxis_title="Intensity",
                       )
-    print(f"Layout updated in {(time.time() - t1)} seconds")
-    t1 = time.time()
-    print(f"Lightcurve done in {(time.time() - t0)} seconds")
     return fig
 
 
@@ -267,15 +262,13 @@ def main():
             graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
             result = {'heatmap': graphJSON, 'current': int(current),
                       'title': f"This is frame number {int(current) + 1} out of {len(data_hm)} <br>"
-                               f" timestamp is {float(UNIX_TIME[int(current)]):.3f} UNIX", }
+                               f" timestamp is {float(UNIX_TIME[int(current)]):.5f} UNIX"
+                               f"<br> or {convert_from_UNIX(float(UNIX_TIME[int(current)]))} UTC", }
             return result
 
     else:
-        files_list = []
-        for elem in os.listdir('static/mat/'):
-            if not elem.startswith('.'):
-                files_list.append(elem)
-        return render_template('main.html', files_list=files_list[:10], he=current_user)
+        return render_template('main.html', he=current_user, load=True,
+                               we_are_home=True)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -305,7 +298,7 @@ def register():
         profile_img = requests.get('http://www.gravatar.com/avatar/' + md5(
             form.email.data.encode()).hexdigest() + '?d=identicon&s=200').content
         user = User(
-            nickname=form.nickname.data,
+            nickname=form.nickname.data.lower(),
             name=form.name.data,
             surname=form.surname.data,
             email=form.email.data,
@@ -318,11 +311,10 @@ def register():
         info = user.info()
         admins = db_sess.query(User).filter(User.is_admin).all()
         admin_mails = [_.email for _ in admins]
-        try:
-            send_email(admin_mails, '[PGI] New user',
-                       plain_text=f'Зарегистрировался новый пользователь со следующими данными: {info}')
-        except:
-            pass
+
+        send_email(admin_mails, '[PGI] New user',
+                   plain_text=f'Зарегистрировался новый пользователь со следующими данными: {info}')
+
         return redirect('/login')
     return render_template('register.html', title='Регистрация', form=form)
 
@@ -333,9 +325,9 @@ def login():
 
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        user = db_sess.query(User).filter(User.email == form.nick.data).first()
+        user = db_sess.query(User).filter(User.email == form.nick.data.lower()).first()
         if not user:
-            user = db_sess.query(User).filter(User.nickname == form.nick.data).first()
+            user = db_sess.query(User).filter(User.nickname == form.nick.data.lower()).first()
 
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
@@ -356,17 +348,16 @@ def reset_password_request():
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        curr_user = db_sess.query(User).filter_by(email=form.nick.data).first()
+        curr_user = db_sess.query(User).filter_by(email=form.nick.data.lower()).first()
         if not curr_user:
-            curr_user = db_sess.query(User).filter_by(nickname=form.nick.data).first()
+            curr_user = db_sess.query(User).filter_by(nickname=form.nick.data.lower()).first()
         if curr_user:
-            print(curr_user)
+            print(curr_user.name, curr_user.surname, "requested reset password")
             send_password_reset_email(curr_user)
         else:
             return render_template('reset_password_request.html',
                                    title='Reset Password', form=form,
                                    message="Пользователь не существует")
-        flash('Check your email for the instructions to reset your password')
         return redirect(f'/forgot_password/ok/{curr_user.nickname}')
     return render_template('reset_password_request.html',
                            title='Reset Password', form=form)
@@ -375,12 +366,10 @@ def reset_password_request():
 @app.route('/forgot_password/ok/<nickname>')
 def okay(nickname):
     db_sess = db_session.create_session()
-    curr_user = db_sess.query(User).filter(User.nickname == nickname).first()
-    email = curr_user.email
+    curr_user = db_sess.query(User).filter(User.nickname == nickname.lower()).first()
+    email = curr_user.email.lower()
     domain = email.split("@")[1]
     service = db_sess.query(Email_services).filter(Email_services.domain == domain).first()
-
-    flash('Мы отправили вам письмо. Пожалуйста, проверьте вашу почту')
     return render_template('we_sent_email.html', service=service)
 
 
@@ -396,24 +385,80 @@ def abort_if_not_found(error):
     return render_template('404.html')
 
 
-@app.route('/users/<nickname>')
-@login_required
+def save_picture(form_picture, user_nickname):
+    random_hex = "".join(random.sample(string.ascii_letters + string.digits, 10))
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.nickname == user_nickname).first()
+
+
+
+@app.route('/users/<nickname>', methods=['GET', 'POST'])
 def user(nickname):
     db_sess = db_session.create_session()
-    user = db_sess.query(User).filter(User.nickname == nickname).first()
-    if not user:
-        flash('User ' + nickname + ' not found.')
-        return redirect("/")
-    posts = [
-        {'author': user, 'body': 'Test post #1'},
-        {'author': user, 'body': 'Test post #2'},
-        {'author': user, 'body': 'Test post #3'},
-        {'author': user, 'body': 'Test post #4'}
-    ]
-    return render_template('user/user.html', user=user, posts=posts, he=current_user)
+    user = db_sess.query(User).filter(User.nickname == nickname.lower()).first()
+    form = UpdateAccountForm()
+    if request.method == 'GET':
+        if not current_user.is_authenticated:
+            abort(404)
+        if not user:
+            flash('User ' + nickname + ' not found.', 'warning')
+            return redirect("/")
+        profile_pic = (base64.b64encode(user.profile_photo)).decode("utf-8")
+        return render_template('user/user.html', user=user, he=current_user,
+                               profile_pic=profile_pic, form=form)
+    else:
+        if form.validate_on_submit():
+            if form.picture.data:
+                pass
+            same_nicks_exist = db_sess.query(User).filter(User.nickname == form.nickname.data).first()
+            if same_nicks_exist:
+                if same_nicks_exist.nickname != current_user.nickname:
+                    profile_pic = (base64.b64encode(user.profile_photo)).decode("utf-8")
+                    return render_template('user/user.html', user=user,
+                                           profile_pic=profile_pic, form=form, he=current_user,
+                                           error_msg=['That username is taken. Please choose a different one.'])
+                else:
+                    user.nickname = form.nickname.data
+            else:
+                user.nickname = form.nickname.data
+
+            this_email_exists = db_sess.query(User).filter(User.email == form.email.data).first()
+            if this_email_exists:
+                if this_email_exists.email != current_user.email:
+                    profile_pic = (base64.b64encode(user.profile_photo)).decode("utf-8")
+                    return render_template('user/user.html', user=user,
+                                           profile_pic=profile_pic, form=form, he=current_user,
+                                           error_msg=['That email is taken. Please choose a different one.'])
+                else:
+                    user.email = form.email.data
+            else:
+                user.email = form.email.data
+            user.name = form.name.data
+            user.surname = form.surname.data
+            db_sess.add(user)
+            db_sess.commit()
+            flash('Your account has been updated!', 'success')
+            return redirect(f'/users/{form.nickname.data}')
+        else:
+            pass
+
+
+@app.route('/all_data_files')
+def all_data_files():
+    files_list = []
+    for filename in os.listdir('static/mat/'):
+        if not filename.startswith('.'):
+            abs_path = os.path.abspath(os.path.join('static/mat/', filename))
+            print("Abs path is", abs_path)
+            bytes_size = os.path.getsize(abs_path)
+            norm_syze: str = human_readable_file_size(bytes_size)
+            files_list.append((filename, norm_syze, abs_path))
+    files_list.sort(key=lambda _: _[0])
+    return render_template('all_data_files.html', files_list=files_list, count=1, he=current_user)
 
 
 if __name__ == "__main__":
     app.run('0.0.0.0', port=5000, debug=True)
     # serve(app, host='0.0.0.0', port=5000)
-    server.quit()
+    if server:
+        server.quit()

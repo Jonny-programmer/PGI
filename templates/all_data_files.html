@@ -1,0 +1,25 @@
+{% extends 'NEW_BASE.html'%}
+
+{% block content %}
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Filename</th>
+          <th scope="col">Size</th>
+          <th scope="col">Download file</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for i in files_list %}
+    <tr>
+        <td>{{ count + files_list.index(i) }}</td>
+        <td>{{ i[0] }}</td>
+        <td>{{ i[1] }}</td>
+        <td><a href="{{ i[2] }}" download="{{ i[0] }}">Download</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

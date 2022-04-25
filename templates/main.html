@@ -3,7 +3,6 @@
 <!-- HERE STARTS THE ACTUAL DESIGN OF MAIN PAGE -->
 {% block content %}
 
-
 <script type="text/javascript" src="{{ url_for('static', filename='js/hm_buttons.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/def_slider_values.js') }}"></script>
 <script>
@@ -54,7 +53,6 @@
 
 </script>
 
-<center class="main_text"><h2>Данные с УФ-телескопа обсерватории ПГИ для исследования полярных сияний</h2></center>
 <div class="files_list" id="listing">
     <div class="calendar-wrapper" id="calendar-wrapper">
     </div>
@@ -64,8 +62,6 @@
             date: date
           });
         }
-
-
 
         $('.calendar-wrapper').calendar();
         $('.calendar-wrapper').calendar({
@@ -88,10 +84,11 @@
 
         let date = new Date(1650620656)
         console.log(date)
-
-
     </script>
-
+    <br>
+    <div style='text-align:center;'>
+        <a class="btn btn-info" href="{{ url_for('all_data_files') }}">All data files</a>
+    </div>
 </div>
 
 

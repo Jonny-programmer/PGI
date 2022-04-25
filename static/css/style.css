@@ -33,6 +33,7 @@ h2 {
     margin: 2% 10%
 }
 
+
 .wrapper {
     display: grid;
     grid-template-columns: 1fr 4fr;

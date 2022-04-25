@@ -3,92 +3,19 @@
 <!-- HERE STARTS THE ACTUAL DESIGN OF MAIN PAGE -->
 {% block content %}
 
+
 <script type="text/javascript" src="{{ url_for('static', filename='js/hm_buttons.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/def_slider_values.js') }}"></script>
-<script>
-    $(document).ready(function () {
-        let nIntervId;
+<script type="text/javascript" src="{{ url_for('static', filename='js/play_button.js') }}"></script>
 
-        function active() {
-
-            if (!nIntervId) {
-                    nIntervId = setInterval(flashText, 100);
-            }
-
-            button_play = document.getElementById("play")
-            if (button_play.title === "Stop") {
-                clearInterval(nIntervId);
-                nIntervId = null;
-                button_play.title = "Play"
-            } else {
-                console.log("dfgfgfge")
-                button_play.title = "Stop"
-                console.log(button_play.title)
-                }
-
-            // check if already an interval has been set up
-
-        }
-
-        function flashText() {
-            $.ajax({
-                url: "/",
-                type: 'POST',
-                data: ({
-                    type: 'heatmap_button_event',
-                    current: window.current,
-                    pos: 'play',
-                    value0: window.value_heatmap0,
-                    value1: window.value_heatmap1,
-                    is_auto: window.is_heatmap_autoscale
-                }),
-                datatype: 'text',
-                success: window.funcSucces
-            })
-        }
-
-
-        document.getElementById("play").addEventListener("click", active);
-    })
-
-</script>
-
+<center class="main_text"><h2>Данные с УФ-телескопа обсерватории ПГИ для исследования полярных сияний</h2></center>
 <div class="files_list" id="listing">
     <div class="calendar-wrapper" id="calendar-wrapper">
+        <div id="container" class="calendar-container"></div>
     </div>
-    <script>
-        function selectDate(date) {
-          $('#calendar-wrapper').updateCalendarOptions({
-            date: date
-          });
-        }
 
-        $('.calendar-wrapper').calendar();
-        $('.calendar-wrapper').calendar({
-            nextButton: 'Next',
-            date: '08/05/2021',
-            prevButton: 'Last',
-            weekDayLength: 1,
-            onClickDate: selectDate,
-            showYearDropdown: true,
-            startOnMonday: false,
-            customDateProps: (date) => ({
-              classes: 'empty-date',
-              data: {
-                type: 'date',
-                form: 'date-object'
-              }
-            })
-        });
+    <script type="text/javascript" src="{{ url_for('static', filename='js/calendar_settings.js') }}"></script>
 
 
-        let date = new Date(1650620656)
-        console.log(date)
-    </script>
-    <br>
-    <div style='text-align:center;'>
-        <a class="btn btn-info" href="{{ url_for('all_data_files') }}">All data files</a>
-    </div>
 </div>
 
 
@@ -96,10 +23,13 @@
     <h1>Light Curve</h1>
 
     <div class="personal_lightcurve_class">
-        <div id="lightcurve" class="lightcurve">
-            <div id="lightcurve_graph">
+        <div>
+            <div id="lightcurve" class="lightcurve">
+                <div id="lightcurve_graph"></div>
             </div>
+            <div id="hoverInfo"></div>
         </div>
+
         <div></div>
         <div></div>
     </div>
@@ -121,13 +51,11 @@
             <div class="autoscale_button" id="autoscale_keogramm">
                 <button class="btn btn-primary">Autoscale</button>
                 <script>
-                        let top_pos = $(" #keogram_slider ").height() + $(" #keogram_slider ").position().top + $(" #autoscale_keogramm ").height();
-                        let left_pos = $(" #keogram_slider ").position().left - $(" #autoscale_keogramm ").width() * 2 / 3;
-                        $(" #autoscale_keogramm ").offset({top: top_pos, left: left_pos});
 
-                        $(document).ready(function () {
-                            $("#autoscale_keogramm").bind("click",
-                            function(){
+
+                    $(document).ready(function () {
+                        $("#autoscale_keogramm").bind("click",
+                            function () {
                                 $.ajax({
                                     url: "/",
                                     type: 'POST',
@@ -140,7 +68,7 @@
                                     success: keogram_success
                                 })
                             });
-                            })
+                    })
                 </script>
             </div>
         </div>
@@ -165,13 +93,10 @@
             <div class="autoscale_button" id="autoscale_heatmap">
                 <button class="btn btn-primary">Autoscale</button>
                 <script>
-                        let top_pos2 = $(" #heatmap_slider ").height() + $(" #heatmap_slider ").position().top + $(" #autoscale_heatmap ").height();
-                        let left_pos2 = $(" #heatmap_slider ").position().left - $(" #autoscale_heatmap ").width() * 2 / 3;
-                        $(" #autoscale_heatmap ").offset({top: top_pos2, left: left_pos2});
 
-                        $(document).ready(function () {
-                            $("#autoscale_heatmap").bind("click",
-                            function(){
+                    $(document).ready(function () {
+                        $("#autoscale_heatmap").bind("click",
+                            function () {
 
                                 window.is_heatmap_autoscale = true;
 
@@ -187,16 +112,15 @@
                                     }),
                                     datatype: 'text',
                                     success: window.funcSucces
-                                })
+                                });
                             });
-                            })
+                    });
+
+                    window.current = 1;
                 </script>
             </div>
         </div>
     </div>
-    <script>
-        window.current = 1;
-    </script>
 
     <script type="text/javascript" src="{{ url_for('static', filename='js/hm_slider.js') }}"></script>
 

@@ -34,6 +34,7 @@ from forms.forgot_password import ResetPasswordRequestForm
 from forms.login import LoginForm
 from forms.new_user import RegisterForm
 from forms.reset_password_form import ResetPasswordForm
+import pandas as pd
 
 load_dotenv()
 SMTP_HOST: str = os.environ["HOST"]
@@ -160,7 +161,9 @@ def Light_curve():
     light_curve_2 = signal.decimate(y2, q=q, ftype='fir', n=8)
     print(f"Decimated in {(time.time() - t1)} seconds")
     t1 = time.time()
-    fig = px.line(x=UNIX_TIME_2, y=light_curve_2)
+    Time2 = pd.to_datetime(pd.Series(UNIX_TIME_2), unit='s').to_numpy()
+    print(Time2)
+    fig = px.line(x=Time2, y=light_curve_2)
     print(f"Created plotly figure in {(time.time() - t1)} seconds")
     t1 = time.time()
     # fig = px.line(x=UNIX_TIME_2, y=light_curve_2)
@@ -178,6 +181,7 @@ def Light_curve():
                       legend=dict(x=.5, xanchor="center"),
                       xaxis_title="Time", yaxis_title="Intensity",
                       )
+    fig.update_xaxes(rangemode="nonnegative")
     print(f"Layout updated in {(time.time() - t1)} seconds")
     t1 = time.time()
     print(f"Lightcurve done in {(time.time() - t0)} seconds")

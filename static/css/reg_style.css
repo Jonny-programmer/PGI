@@ -51,7 +51,7 @@ a:hover {
     margin: 0 auto;
     padding-top: 40px;
     padding-bottom: 40px;
-    background: url("../img/registration-form-2.jpg") no-repeat center;
+    background: url("../img/registration-form-2.jpg") no-repeat center !important;
     border-radius: 15px;
     border: 10px solid #42b9ff;
 }

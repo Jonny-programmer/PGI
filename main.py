@@ -339,6 +339,8 @@ def main():
             date_list = []
 
             for elem in os.listdir('./static/mat'):
+                if not elem.endswith('.mat') or elem.startswith("."):
+                    continue
                 elem = elem.split('-')
                 tpl = (elem[2], elem[1], elem[0])
                 date_list.append(tpl)

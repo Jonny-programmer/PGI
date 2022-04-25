@@ -71,7 +71,11 @@ h2 {
 
 }
 
-
+.files-button {
+    left: 27%;
+    right: 27%;
+    width: 46%;
+}
 
 
 .files_list {

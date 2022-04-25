@@ -169,6 +169,10 @@ def Light_curve():
                                     '<br><b>Time</b>: %{x:.2f}<br>' +
                                     '<br><b>Hello there</b>',
                       showlegend=False)
+    # fig.update_traces(xhoverformat='%H~%M~%S')
+    fig.update_traces(name='sdfjdsdf')
+    fig.update_traces(legendgrouptitle_text='asudyggggggetfwotfdkvd')
+
     fig.update_layout(hovermode="x unified")
     fig.update_layout(legend_orientation="h",
                       legend=dict(x=.5, xanchor="center"),

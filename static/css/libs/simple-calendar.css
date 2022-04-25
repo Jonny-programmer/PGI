@@ -36,11 +36,26 @@
     top: 0;
     left: 0;
     transform: rotate(-180deg); }
+
+  .calendar header .btn-prev2 {
+    top: 30px;
+    left: 0;
+    transform: rotate(-180deg); }
+
+
   .calendar header .btn-next {
     top: 0;
     right: 0; }
     .calendar header .btn-next:before {
       transform: rotate(45deg); }
+
+  .calendar header .btn-next2 {
+    top: 30px;
+    right: 0; }
+    .calendar header .btn-next2:before {
+      transform: rotate(45deg); }
+
+
   .calendar header .month {
     padding: 0;
     margin: 0; }

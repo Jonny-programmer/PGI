@@ -38,7 +38,9 @@ window.firstSuccess = function (data) {
     let lightcurve_graph = JSON.parse(data['lightcurve']);
     Plotly.plot('lightcurve_graph', lightcurve_graph, {});
 
-    lightcurve = document.getElementById('lightcurve_graph')
+
+    lightcurve = document.getElementById('lightcurve_graph'),
+        hoverInfo = document.getElementById('hoverInfo')
 
     lightcurve.on('plotly_click', function (data) {
         let x = data.points[0].x;
@@ -56,6 +58,8 @@ window.firstSuccess = function (data) {
             success: window.funcSucces
         })
     })
+
+    $("#next").trigger('click');
 
 }
 

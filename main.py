@@ -193,7 +193,6 @@ def Keogram(max_min_values: list):  # Функция построения гра
                                     '<br><b>Time</b>: %{x|%H:%M:%S}<br>',  # отображается значение по y и время по x
                       showlegend=False  # Не показывать легенду
                       )
-    print(f"---> Created Keogramm: {time.time() - t0} seconds")
 
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 

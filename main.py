@@ -1,3 +1,5 @@
+# Инициализируем все необходимые библиотеки
+
 import mimetypes
 import os
 import smtplib
@@ -41,9 +43,13 @@ SMTP_HOST: str = os.environ["HOST"]
 SMTP_PORT: int = int(os.environ["PORT"])
 
 # Main app definition
+
+# Инициализируем Flask сервер
 app = Flask(__name__, template_folder='templates')
 app.config.from_pyfile('config.py')
 # Additions:
+
+# Инициализируем LoginManager
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'users.login'
@@ -54,7 +60,7 @@ mail = Mail(app)
 # password = os.getenv("PASSWORD")
 # server.login(addr_from, password)
 
-db_session.global_init("db/users.db")
+db_session.global_init("db/users.db")  # Подключаем базу данных
 
 
 def send_async_email(app, msg):
@@ -121,56 +127,113 @@ def send_password_reset_email(user):
                                          user=user, token=token))
 
 
-def Heatmap(frame: int, max_min_values: list):
-    array = data_hm[frame]
-    fig = px.imshow(array, zmax=max(max_min_values), zmin=min(max_min_values), aspect='equal', origin='upper')
+def Heatmap(frame: int, max_min_values: list):  # Функция построения графика heatmap
 
-    fig.update_layout(legend_orientation="h",
-                      showlegend=False,
-                      xaxis_title="",
-                      yaxis_title="", )
-    return fig
+    """
+    :param frame: номер текущего фрейма
+    :param max_min_values: минимальное и максимальное значение scale. задаётся пользователем. в случае выбора autoscale оба значения нули
+    :return: json строка, в которой лежит генератор построения Heatmap
+    """
+
+    array = data_hm[frame]  # Достаём из текущего файла данные для построения
+
+    # Построим генератор графика
+    fig = px.imshow(array,
+                    zmax=max(max_min_values),  # Все значения больше zmax будут приравняны к zmax при построении
+                    zmin=min(max_min_values),  # Все значения меньше zmin будут приравняны к zmix при построении
+                    aspect='equal',  # для того, чтобы каждое значение было квадратным
+                    origin='upper'
+                    )
+    # Если zmax = zmin, график строится по autoscale
+
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 
-def Keogram(max_min_values: list):
+def Keogram(max_min_values: list):  # Функция построения графика keogram
+
+    """
+    :param max_min_values: минимальное и максимальное значение scale. задаётся пользователем. в случае выбора autoscale оба значения нули
+    :return: json строка, в которой лежит генератор построения Keogram
+    """
+
     t0 = time.time()
 
-    diag_global = file["diag_global"]
-    diag_global = np.rot90(diag_global)
+    diag_global = file["diag_global"]  # Достаём из текущего файла данные для построения
+    diag_global = np.rot90(diag_global)  # Преобразуем данные в необходимый формат
     t1 = time.time()
-    diag_global_2 = signal.decimate(diag_global, q=q, ftype='fir')
+
+    # Сожмём данные из diag global
+    diag_global_2 = signal.decimate(diag_global,
+                                    q=q,  # выход будет в q раз меньше
+                                    ftype='fir'  # Используется функция фильтра с конечной импульсной характеристикой
+                                    )
+
     print(f"---> Decimated in {(time.time() - t1)} seconds")
-    fig = px.imshow(diag_global_2, x=UNIX_TIME_2, zmax=max(max_min_values), zmin=min(max_min_values), aspect='auto')
+
+    # Построим генератор графика
+    fig = px.imshow(diag_global_2,
+                    # Множество значений по оси Y. значение задано массивом из 16 чисел:
+                    # диагонали heatmap в этом моменте времени
+                    x=UNIX_TIME_2,
+                    # Множество значений по оси X. Каждое Задано датой и временем текущей точки
+                    zmax=max(max_min_values),  # Все значения больше zmax будут приравняны к zmax при построении
+                    zmin=min(max_min_values),  # Все значения меньше zmin будут приравняны к zmix при построении
+                    aspect='auto'  # Каждое значение по размеру насраивается автоматически от масштаба графика
+                    )
+
+    # Настроим, что будет выводиться при наведение курсора на точку графика
     fig.update_traces(hovertemplate='<i>Value</i>: %{y:.2f}' +
-                                    '<br><b>Time</b>: %{x|%H:%M:%S}<br>',
-                      showlegend=False)
-    fig.update_layout()
+                                    '<br><b>Time</b>: %{x|%H:%M:%S}<br>',  # отображается значение по y и время по x
+                      showlegend=False  # Не показывать легенду
+                      )
     print(f"---> Created Keogramm: {time.time() - t0} seconds")
 
-    return fig
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 
-def Light_curve():
+def Light_curve():  # Функция построения графика Light curve
+
+    """
+    :return: json строка, в которой лежит генератор построения Keogram
+    """
+
     t0 = time.time()
     t1 = time.time()
-    light_curve = file['lightcurvesum_global']
+
+    light_curve = file['lightcurvesum_global']  # Достаём из текущего файла данные для построения
+
     print(f"Got data from file in {(time.time() - t1)} seconds")
     t1 = time.time()
-    y2 = np.ravel(light_curve)
+
+    light_curve = np.ravel(light_curve)  # приведём данные к нужному формату
+
     print(f"Concatenated in {(time.time() - t1)} seconds")
     t1 = time.time()
-    light_curve_2 = signal.decimate(y2, q=q, ftype='fir', n=8)
+    light_curve_2 = signal.decimate(light_curve,
+                                    q=q,  # выход будет в q раз меньш
+                                    ftype='fir',  # Используется функция фильтра с конечной импульсной характеристикой
+                                    n=8  # Порядок фильтра
+                                    )
     print(f"Decimated in {(time.time() - t1)} seconds")
     t1 = time.time()
-    fig = px.line(x=UNIX_TIME_2, y=light_curve_2)
+
+    fig = px.line(x=UNIX_TIME_2,  # Множество значений по оси X. Каждое Задано датой и временем текущей точки
+                  y=light_curve_2  # Множество значений по оси Y. Каждое Задано интенсивностью света в данной точке
+                  )
+
     print(f"Created plotly figure in {(time.time() - t1)} seconds")
     t1 = time.time()
+
+    # Настроим, что будет выводиться при наведение курсора на точку графика
     fig.update_traces(mode="markers+lines",
-                      hovertemplate='<i>Value</i>: %{y:.2f}' +
+
+                      hovertemplate='<i>Value</i>: %{y:.2f}' +  # отображается интенсивность по y и время по x
                                     '<br><b>Time</b>: %{x|%H:%M:%S}<br>',
+
                       showlegend=False)
 
-    fig.update_layout(legend_orientation="h",
+    # Настроим
+    fig.update_layout(legend_orientation="h",  #
                       legend=dict(x=.5, xanchor="center"),
                       xaxis_title="Time", yaxis_title="Intensity",
                       )
@@ -212,19 +275,17 @@ def main():
     # if current_user.is_authenticated:
     if request.method == 'POST':
         if request.values.get('type') == 'first_event':
-            fig1 = Heatmap(1, [20000, 200000])
-            fig2 = Keogram([20000, 200000])
+            heatmap_graph = Heatmap(1, [20000, 200000])
+            keogram_graph = Keogram([20000, 200000])
             fig3 = Light_curve()
-            heatmap_graph = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
-            keogram_graph = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
+
             lightcurve_graph = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
             result = {'heatmap': heatmap_graph, 'keogram': keogram_graph, 'lightcurve': lightcurve_graph}
             return result
 
         elif request.values.get('type') == 'keogram_slider_event':
             values = [int(request.values.get('value0')), int(request.values.get('value1'))]
-            fig = Keogram(values)
-            graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+            graphJSON = Keogram(values)
             return graphJSON
         elif request.values.get('type') in ['heatmap_slider_event', 'heatmap_button_event', 'lightcurve_click_event']:
             current = 0
@@ -245,8 +306,7 @@ def main():
             values = [int(request.values.get('value0')), int(request.values.get('value1'))]
             if request.values.get('is_auto') == 'true':
                 values = [0, 0]
-            fig = Heatmap(current, values)
-            graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+            graphJSON = Heatmap(current, values)
 
             current_time = UNIX_TIME[int(current)]
             current_time = time.strftime("%H:%M:%S", time.localtime(int(current_time)))

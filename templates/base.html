@@ -37,31 +37,37 @@
 
 </head>
 <body>
-    <script>
-    $(document).ready(function() {
-        setInterval(function() {
-            let p = $(".preloader");
-            p.css('opacity', 0);
+    {% if load %}
+        <script>
+        $(document).ready(function() {
+            setInterval(function() {
+                let p = $(".preloader");
+                p.css('opacity', 0);
 
-            setInterval(() => p.remove(),
-                parseInt(p.css('--duration')) * 1000
-            );
-        }, 1000);
-    });
-    </script>
-    <div class="preloader" id="preloader">
-        <div class="preloader__content">
-            <div class="preloader__first"></div>
-            <div class="preloader__second"></div>
-            <div class="preloader__third"></div>
+                setInterval(() => p.remove(),
+                    parseInt(p.css('--duration')) * 1000
+                );
+            }, 1000);
+        });
+        </script>
+        <div class="preloader" id="preloader">
+            <div class="preloader__content">
+                <div class="preloader__first"></div>
+                <div class="preloader__second"></div>
+                <div class="preloader__third"></div>
+            </div>
         </div>
-    </div>
-
+    {% endif %}
     <div class="wrapper">
         <div class="head">
             <div class="head-bar">
                <div class="user_settings" align="right">
-                   <a href="#">Home</a> |
+                   {% if we_are_home %}
+                        <a href="#">Home</a> |
+                   {% else %}
+                        <a href="/">Home</a> |
+                   {% endif %}
+
                    {% if he.is_authenticated %}
                    <a href="{{ url_for('user', nickname=he.nickname) }}">Your Profile</a> |
                    <a href="{{ url_for('logout') }}">Logout</a>
@@ -77,10 +83,9 @@
                 Лаборатория космических лучей<br> предельно высоких энергий НИИЯФ МГУ</a>
             </div>
         </div>
-
+        <center class="main_text"><h2>Данные с УФ-телескопа обсерватории ПГИ для исследования полярных сияний</h2></center>
 
         {% block content %}{% endblock %}
-
 
         <div class="footer">
             <div class="center">

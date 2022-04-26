@@ -37,8 +37,8 @@ from forms.login import LoginForm
 from forms.new_user import RegisterForm
 from forms.profile_redact import UpdateAccountForm
 from forms.reset_password_form import ResetPasswordForm
+import pandas as pd
 from human_readable_file_size import human_readable_file_size
-
 server = False
 load_dotenv()
 SMTP_HOST: str = os.environ["HOST"]
@@ -150,6 +150,12 @@ def Keogram(max_min_values: list):
     fig = px.imshow(diag_global_2, x=UNIX_TIME_2, zmax=max(max_min_values), zmin=min(max_min_values), aspect='auto')
     fig.update_layout(hovermode="x unified",)
     fig.update_traces(hovertemplate='')
+    fig.update_traces(hovertemplate='<i>Value</i>: %{y:.2f}' +
+                                    '<br><b>Time</b>: %{x|%H:%M:%S}<br>',
+                      showlegend=False)
+    fig.update_layout()
+    print(f"---> Created Keogramm: {time.time() - t0} seconds")
+
     return fig
 
 
@@ -162,13 +168,10 @@ def Light_curve():
     fig.update_traces(mode="markers+lines",
                       hovertemplate='<i>Value</i>: %{y:.2f}' +
                                     '<br><b>Time</b>: %{x:.3f} <br>' +
-                                    '<br><b>Hello there</b>',
+                                    '<br><b>Hello there</b>' +
+                                    '<br><b>Time</b>: %{x|%H:%M:%S}<br>',
                       showlegend=False)
-    # fig.update_traces(xhoverformat='%H~%M~%S')
-    fig.update_traces(name='sdfjdsdf')
-    fig.update_traces(legendgrouptitle_text='asudyggggggetfwotfdkvd')
 
-    fig.update_layout(hovermode="x unified")
     fig.update_layout(legend_orientation="h",
                       legend=dict(x=.5, xanchor="center"),
                       xaxis_title="Time", yaxis_title="Intensity",
@@ -202,7 +205,7 @@ def load_user(user_id):
 
 @app.route("/", methods=["GET", "POST"])
 def main():
-    global file, unix_time, UNIX_TIME, UNIX_TIME_2, q, data_hm, max_hm
+    global file, UNIX_TIME, UNIX_TIME_2, q, data_hm, max_hm
     # db_sess = db_session.create_session()
     # here we can use
     # if current_user.is_authenticated:
@@ -236,17 +239,20 @@ def main():
                     elif current + changes[request.values.get('pos')] >= max_hm:
                         current = max_hm - 1
             else:
-                x = float(request.values.get('x'))
-                current = np.where(UNIX_TIME_2 == x)[0][0] * q
+                x = 'T'.join(request.values.get('x').split()) + '.000000000'
+                current = np.where(UNIX_TIME_2.astype(np.str_) == x)[0][0] * q
             values = [int(request.values.get('value0')), int(request.values.get('value1'))]
-            print(request.values.get('is_auto'))
             if request.values.get('is_auto') == 'true':
                 values = [0, 0]
             fig = Heatmap(current, values)
             graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+            current_time = UNIX_TIME[int(current)]
+            current_time = time.strftime("%H:%M:%S", time.localtime(int(current_time)))
             result = {'heatmap': graphJSON, 'current': int(current),
                       'title': f"This is frame number {int(current) + 1} out of {len(data_hm)} <br>"
-                               f" timestamp is {float(UNIX_TIME[int(current)]):.5f} UNIX"
+                               f" time: {current_time}" +
+                               f" timestamp is {float(UNIX_TIME[int(current)]):.5f} UNIX" +
                                f"<br> or {convert_from_UNIX(float(UNIX_TIME[int(current)]))} UTC", }
             return result
 
@@ -273,9 +279,10 @@ def main():
             q = 6200  # То, во сколько раз вы прорежаете массив (берете каждый q-й элемент)
             a = np.zeros(q - UNIX_TIME.shape[0] + ((UNIX_TIME.shape[0] + 1) // q) * q)
             UNIX_TIME_2 = np.concatenate((UNIX_TIME, a)).reshape(-1, q)[:, 0]
+            UNIX_TIME_2 = pd.to_datetime(pd.Series(UNIX_TIME_2 // 1), unit='s').to_numpy()
             data_hm = file['pdm_2d_rot_global']
             max_hm = len(data_hm)
-            return 'sfgdfg'
+            return ''
 
         elif request.values.get('type') == 'get_date_list':
 

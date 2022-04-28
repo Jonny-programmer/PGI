@@ -41,6 +41,7 @@ from forms.profile_redact import UpdateAccountForm
 from forms.reset_password_form import ResetPasswordForm
 import pandas as pd
 from human_readable_file_size import human_readable_file_size
+
 server = False
 load_dotenv()
 SMTP_HOST: str = os.environ["HOST"]
@@ -58,6 +59,12 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'users.login'
 
+
+# class SimilArarrays:
+#     def __init__(self, arr1: np.ndarray, arr2: np.ndarray):
+#         self.arr1 = arr1
+#         self.arr2 = arr2
+#         self.inds =
 
 def create_mail_server():
     global server
@@ -166,7 +173,6 @@ def Keogram(max_min_values: list):  # Функция построения гра
     :return: json строка, в которой лежит генератор построения Keogram
     """
 
-
     diag_global = file["diag_global"]  # Достаём из текущего файла данные для построения
     diag_global = np.rot90(diag_global)  # Преобразуем данные в необходимый формат
 
@@ -175,7 +181,6 @@ def Keogram(max_min_values: list):  # Функция построения гра
                                     q=q,  # выход будет в q раз меньше
                                     ftype='fir'  # Используется функция фильтра с конечной импульсной характеристикой
                                     )
-
 
     # Построим генератор графика
     fig = px.imshow(diag_global_2,
@@ -197,15 +202,16 @@ def Keogram(max_min_values: list):  # Функция построения гра
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 
-def Light_curve():  # Функция построения графика Light curve
+def Light_curve(UNIX_TIME_2, y_range=None, cord1=0, cord2=-1):  # Функция построения графика Light curve
 
     """
-    :return: json строка, в которой лежит генератор построения Keogram
+    :return: json строка, в которой лежит генератор построения Light curve
     """
 
+    light_curve = file['lightcurvesum_global'][cord1: cord2]  # Достаём из текущего файла данные для построения
 
-    light_curve = file['lightcurvesum_global']  # Достаём из текущего файла данные для построения
-
+    print(f'light_curve: {light_curve.shape}')
+    print(f'q: {q}')
     light_curve = np.ravel(light_curve)  # приведём данные к нужному формату
 
     light_curve_2 = signal.decimate(light_curve,
@@ -213,9 +219,10 @@ def Light_curve():  # Функция построения графика Light c
                                     ftype='fir',  # Используется функция фильтра с конечной импульсной характеристикой
                                     n=8  # Порядок фильтра
                                     )
-
+    print(f'light_curve_2: {light_curve_2.shape}')
     fig = px.line(x=UNIX_TIME_2,  # Множество значений по оси X. Каждое Задано датой и временем текущей точки
-                  y=light_curve_2  # Множество значений по оси Y. Каждое Задано интенсивностью света в данной точке
+                  y=light_curve_2,  # Множество значений по оси Y. Каждое Задано интенсивностью света в данной точке
+                  range_y=y_range
                   )
 
     # Настроим, что будет выводиться при наведение курсора на точку графика
@@ -260,7 +267,7 @@ def load_user(user_id):
 
 @app.route("/", methods=["GET", "POST"])
 def main():
-    global file, UNIX_TIME, UNIX_TIME_2, q, data_hm, max_hm
+    global file, UNIX_TIME, UNIX_TIME_2, q, data_hm, max_hm, UNIX_TIME_for_lightcurve, UNIX_TIME_2_for_lightcurve
     # db_sess = db_session.create_session()
     # here we can use
     # if current_user.is_authenticated:
@@ -268,7 +275,7 @@ def main():
         if request.values.get('type') == 'first_event':
             heatmap_graph = Heatmap(1, [20000, 200000])
             keogram_graph = Keogram([20000, 200000])
-            fig3 = Light_curve()
+            fig3 = Light_curve(UNIX_TIME_2)
 
             lightcurve_graph = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
             result = {'heatmap': heatmap_graph, 'keogram': keogram_graph, 'lightcurve': lightcurve_graph}
@@ -292,18 +299,32 @@ def main():
                     elif current + changes[request.values.get('pos')] >= max_hm:
                         current = max_hm - 1
             else:
-                x = 'T'.join(request.values.get('x').split()) + '.000000000'
-                current = np.where(UNIX_TIME_2.astype(np.str_) == x)[0][0] * q
+                x = request.values.get('x')
+                print(f'x: {x}')
+
+                x = int(time.mktime(time.strptime(x, '%Y-%m-%d %H:%M:%S.%f'))) + 3 * 60 * 60
+                print(x)
+
+                def find_nearest(array, value):
+                    array = np.asarray(array)
+                    idx = (np.abs(array - value)).argmin()
+                    return idx
+
+                current = find_nearest(UNIX_TIME, x)
+
+                print(current)
+
+                # current = np.where(UNIX_TIME_2.astype(np.str_) == x)[0][0] * q
             values = [int(request.values.get('value0')), int(request.values.get('value1'))]
             if request.values.get('is_auto') == 'true':
                 values = [0, 0]
             graphJSON = Heatmap(current, values)
 
             current_time = UNIX_TIME[int(current)]
+            f = str(current_time).split('.')[1][:4]
             current_time = time.strftime("%H:%M:%S", time.localtime(int(current_time)))
             result = {'heatmap': graphJSON, 'current': int(current),
-                      'title': f"This is frame number {int(current) + 1} out of {len(data_hm)} <br>"
-                               f" time: {current_time}", }
+                      'title': f" time: {current_time}.{f}", }
             return result
 
         elif request.values.get('type') == 'date_event':
@@ -326,10 +347,26 @@ def main():
             unix_time = [np.linspace(unix_time[i], unix_time[i + 1], 128) for i in range(len(unix_time) - 1)]
             UNIX_TIME = np.ravel(unix_time)
 
+            UNIX_TIME_for_lightcurve = UNIX_TIME.copy()
+
             q = 6200  # То, во сколько раз вы прорежаете массив (берете каждый q-й элемент)
             a = np.zeros(q - UNIX_TIME.shape[0] + ((UNIX_TIME.shape[0] + 1) // q) * q)
             UNIX_TIME_2 = np.concatenate((UNIX_TIME, a)).reshape(-1, q)[:, 0]
-            UNIX_TIME_2 = pd.to_datetime(pd.Series(UNIX_TIME_2 // 1), unit='s').to_numpy()
+            UNIX_TIME_2 = pd.to_datetime(pd.Series(UNIX_TIME_2), unit='s').to_numpy()
+
+            print('=' * 50)
+            print('=' * 50)
+            print('=' * 50)
+            print('=' * 50)
+            print(UNIX_TIME_2.shape)
+            print(UNIX_TIME.shape)
+            print('=' * 50)
+            print('=' * 50)
+            print('=' * 50)
+            print('=' * 50)
+
+            UNIX_TIME_2_for_lightcurve = UNIX_TIME_2.copy()
+
             data_hm = file['pdm_2d_rot_global']
             max_hm = len(data_hm)
             return ''
@@ -344,6 +381,61 @@ def main():
                 date_list.append(tpl)
 
             return {'data': tuple(date_list)}
+
+        elif request.values.get('type') == 'lightcurve_change':
+
+            x0 = 'T'.join(request.values.get('x0').split())
+            x1 = 'T'.join(request.values.get('x1').split())
+            y0 = float(request.values.get('y0'))
+            y1 = float(request.values.get('y1'))
+            print(x0, x1, y0, y1)
+
+            y_range = [y0, y1]
+
+            def find_nearest(array, value):
+                array = np.asarray(array)
+                idx = (np.abs(array - value)).argmin()
+                return idx
+
+            x0 = np.array([x0]).astype(np.datetime64)
+            x1 = np.array([x1]).astype(np.datetime64)
+
+            current_x_0 = find_nearest(UNIX_TIME_2_for_lightcurve, x0) * q
+            current_x_1 = find_nearest(UNIX_TIME_2_for_lightcurve, x1) * q
+
+            UNIX_TIME_for_lightcurve = UNIX_TIME_for_lightcurve[current_x_0: current_x_1]
+
+            q = len(UNIX_TIME_for_lightcurve) // 150
+            print(f'UNIX_TIME: {UNIX_TIME_for_lightcurve.shape}')
+            print(f'q: {q}')
+            # a = np.zeros(q - UNIX_TIME.shape[0] + ((UNIX_TIME.shape[0] + 1) // q) * q)
+            a = np.zeros(q - UNIX_TIME_for_lightcurve.shape[0] % q if UNIX_TIME_for_lightcurve.shape[0] % q else 0)
+            print(f'a: {a.shape}')
+            UNIX_TIME_2_for_lightcurve = np.concatenate((UNIX_TIME_for_lightcurve, a))
+            print(f'UNIX_TIME_2_for_lightcurve: {UNIX_TIME_2_for_lightcurve.shape}')
+            UNIX_TIME_2_for_lightcurve = UNIX_TIME_2_for_lightcurve.reshape(-1, q)[:, 0]
+            UNIX_TIME_2_for_lightcurve = pd.to_datetime(pd.Series(UNIX_TIME_2_for_lightcurve), unit='s').to_numpy()
+
+            print(f'UNIX_TIME_2: {UNIX_TIME_2_for_lightcurve.shape}')
+            print(y_range)
+
+            fig = Light_curve(UNIX_TIME_2_for_lightcurve, y_range=y_range, cord1=current_x_0, cord2=current_x_1)
+            lightcurve_graph = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+            return {'lightcurve': lightcurve_graph}
+
+        elif request.values.get('type') == 'lightcurve_all_graph_event':
+            q = 6200
+            fig = Light_curve(UNIX_TIME_2)
+
+            UNIX_TIME_2_for_lightcurve = UNIX_TIME_2.copy()
+            UNIX_TIME_for_lightcurve = UNIX_TIME.copy()
+            lightcurve_graph = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+            return {'lightcurve': lightcurve_graph}
+
+
+
+
 
 
     else:
@@ -472,7 +564,6 @@ def save_picture(form_picture, user_nickname):
     user = db_sess.query(User).filter(User.nickname == user_nickname).first()
 
 
-
 @app.route('/users/<nickname>', methods=['GET', 'POST'])
 def user(nickname):
     db_sess = db_session.create_session()
@@ -539,7 +630,7 @@ def all_data_files():
 
 
 if __name__ == "__main__":
-    app.run('0.0.0.0', port=5000, debug=True)
+    app.run('0.0.0.0', port=5001, debug=True)
     # serve(app, host='0.0.0.0', port=5000)
     if server:
         server.quit()

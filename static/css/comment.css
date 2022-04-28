@@ -1,0 +1,18 @@
+.comment-wrapper {
+    margin: 0 auto !important;
+    max-width: 80%;
+    border: 1px solid green;
+    text-align: center;
+}
+
+.date {
+    display: table-cell;
+}
+
+img {
+    align: left;
+    max-width: 100%;
+}
+.col {
+    width: max-content;
+}

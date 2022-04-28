@@ -108,6 +108,7 @@ $.ajax({
 function dateSuccess(data) {
 
     $(".block").css("display", "block");
+    $(".block1").css("display", "none");
 
     let top_pos = $(" #keogram_slider ").height() + $(" #keogram_slider ").position().top + $(" #autoscale_keogramm ").height();
     let left_pos = $(" #keogram_slider ").position().left - $(" #autoscale_keogramm ").width() * 2 / 3;

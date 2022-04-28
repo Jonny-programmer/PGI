@@ -1,14 +1,14 @@
 # Инициализируем все необходимые библиотеки
-
 import base64
 import mimetypes
 import os
 import smtplib
 import string
+
+import time
 from random import random
 import random
 
-import time
 from datetime import datetime
 from email import encoders
 from email.mime.audio import MIMEAudio
@@ -41,13 +41,15 @@ from forms.profile_redact import UpdateAccountForm
 from forms.reset_password_form import ResetPasswordForm
 import pandas as pd
 from human_readable_file_size import human_readable_file_size
+
+# Настраиваем SMTP_SERVER
 server = False
 load_dotenv()
 SMTP_HOST: str = os.environ["HOST"]
 SMTP_PORT: int = int(os.environ["PORT"])
 
 # Main app definition
-
+filename = None
 # Инициализируем Flask сервер
 app = Flask(__name__, template_folder='templates')
 app.config.from_pyfile('config.py')
@@ -98,6 +100,7 @@ def send_email(recipients, subject, plain_text=None, html_text=None, attachments
 
 
 def attach_file(msg, f):
+    """Функция прикрепляет файл к письму"""
     attach_types = {
         'text': MIMEText,
         'image': MIMEImage,
@@ -121,6 +124,7 @@ def attach_file(msg, f):
 
 
 def process_attachments(msg, attachments):
+    """Функция обрабатывает прикрепление множества файлов"""
     for f in attachments:
         if os.path.isfile(f):
             attach_file(msg, f)
@@ -138,7 +142,6 @@ def send_password_reset_email(user):
 
 
 def Heatmap(frame: int, max_min_values: list):  # Функция построения графика heatmap
-
     """
     :param frame: номер текущего фрейма
     :param max_min_values: минимальное и максимальное значение scale. задаётся пользователем. в случае выбора autoscale оба значения нули
@@ -159,14 +162,11 @@ def Heatmap(frame: int, max_min_values: list):  # Функция построе�
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 
-def Keogram(max_min_values: list):  # Функция построения графика keogram
-
+def Keogram(max_min_values: list):  # Функция построения графика keogramm
     """
     :param max_min_values: минимальное и максимальное значение scale. задаётся пользователем. в случае выбора autoscale оба значения нули
     :return: json строка, в которой лежит генератор построения Keogram
     """
-
-
     diag_global = file["diag_global"]  # Достаём из текущего файла данные для построения
     diag_global = np.rot90(diag_global)  # Преобразуем данные в необходимый формат
 
@@ -175,7 +175,6 @@ def Keogram(max_min_values: list):  # Функция построения гра
                                     q=q,  # выход будет в q раз меньше
                                     ftype='fir'  # Используется функция фильтра с конечной импульсной характеристикой
                                     )
-
 
     # Построим генератор графика
     fig = px.imshow(diag_global_2,
@@ -198,38 +197,31 @@ def Keogram(max_min_values: list):  # Функция построения гра
 
 
 def Light_curve():  # Функция построения графика Light curve
-
     """
     :return: json строка, в которой лежит генератор построения Keogram
     """
-
-
     light_curve = file['lightcurvesum_global']  # Достаём из текущего файла данные для построения
-
     light_curve = np.ravel(light_curve)  # приведём данные к нужному формату
-
     light_curve_2 = signal.decimate(light_curve,
-                                    q=q,  # выход будет в q раз меньш
+                                    q=q,  # выход будет в q раз меньше
                                     ftype='fir',  # Используется функция фильтра с конечной импульсной характеристикой
                                     n=8  # Порядок фильтра
                                     )
-
     fig = px.line(x=UNIX_TIME_2,  # Множество значений по оси X. Каждое Задано датой и временем текущей точки
                   y=light_curve_2  # Множество значений по оси Y. Каждое Задано интенсивностью света в данной точке
                   )
 
-    # Настроим, что будет выводиться при наведение курсора на точку графика
+    # Настроим, что будет выводиться при наведении курсора на точку графика
     fig.update_traces(mode="markers+lines",
-
                       hovertemplate='<i>Value</i>: %{y:.2f}' +  # отображается интенсивность по y и время по x
                                     '<br><b>Time</b>: %{x|%H:%M:%S}<br>',
-
                       showlegend=False)
 
     # Настроим
     fig.update_layout(legend_orientation="h",  #
                       legend=dict(x=.5, xanchor="center"),
                       xaxis_title="Time", yaxis_title="Intensity",
+                      hovermode="x unified"
                       )
     return fig
 
@@ -238,13 +230,18 @@ def Light_curve():  # Функция построения графика Light c
 def reset_password(token):
     db_sess = db_session.create_session()
     if current_user.is_authenticated:
+        # Пользователь уже вошел в аккаунт, ему не надо сбрасывать пароль
         return redirect(url_for('main'))
+    # Узнаем, какой пользователь пришел по этой ссылке
     user_id = User.verify_reset_password_token(token)
     curr_user = db_sess.query(User).filter(User.id == user_id).first()
     if not curr_user:
+        # Если пользователя, для которого была сгенерирована ссылка, нет
         return redirect(url_for('main'))
     form = ResetPasswordForm()
+    # Форма для сброса пароля
     if form.validate_on_submit():
+        # Устанавливаем новый пароль
         curr_user.set_password(form.password.data)
         db_sess.commit()
         flash('Your password has been reset.')
@@ -260,10 +257,12 @@ def load_user(user_id):
 
 @app.route("/", methods=["GET", "POST"])
 def main():
-    global file, UNIX_TIME, UNIX_TIME_2, q, data_hm, max_hm
+    global file, UNIX_TIME, UNIX_TIME_2, q, data_hm, max_hm, filename
     # db_sess = db_session.create_session()
     # here we can use
     # if current_user.is_authenticated:
+
+    # return render_template('main.html', he=current_user, load=True)
     if request.method == 'POST':
         if request.values.get('type') == 'first_event':
             heatmap_graph = Heatmap(1, [20000, 200000])
@@ -273,7 +272,6 @@ def main():
             lightcurve_graph = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
             result = {'heatmap': heatmap_graph, 'keogram': keogram_graph, 'lightcurve': lightcurve_graph}
             return result
-
         elif request.values.get('type') == 'keogram_slider_event':
             values = [int(request.values.get('value0')), int(request.values.get('value1'))]
             graphJSON = Keogram(values)
@@ -305,7 +303,6 @@ def main():
                       'title': f"This is frame number {int(current) + 1} out of {len(data_hm)} <br>"
                                f" time: {current_time}", }
             return result
-
         elif request.values.get('type') == 'date_event':
             months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',
                       'Nov', 'Dec']
@@ -315,7 +312,6 @@ def main():
                 return '0' * (2 - len(str(date))) + str(date)
 
             filename = f'{date[-1]}-{to_date(months.index(date[1]) + 1)}-{to_date(date[2])}-d3.mat'
-            print(filename)
 
             file = File(f'./static/mat/{filename}')
 
@@ -333,9 +329,7 @@ def main():
             data_hm = file['pdm_2d_rot_global']
             max_hm = len(data_hm)
             return ''
-
         elif request.values.get('type') == 'get_date_list':
-
             date_list = []
 
             for elem in os.listdir('./static/mat'):
@@ -346,11 +340,40 @@ def main():
                 date_list.append(tpl)
 
             return {'data': tuple(date_list)}
-
-
-    else:
-        return render_template('main.html', he=current_user, load=True,
-                               we_are_home=True)
+        else:
+            db_sess = db_session.create_session()
+            timestamp = request.values.get('timestamp')
+            # 2022-02-03 17:46:12
+            comment = request.values.get('comment')
+            is_private = request.values.get('is_private')
+            if not timestamp:
+                return render_template('main.html', he=current_user, load=False, we_are_home=True,
+                                       message='Time field is empty. To fill it, tap to lightcurve')
+            if not comment:
+                return render_template('main.html', he=current_user, load=False, we_are_home=True,
+                                       message='Please enter a comment')
+            if is_private:
+                is_private = True
+            structed_time = time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+            real_timestamp = datetime.fromtimestamp(time.mktime(structed_time))
+            comment = Comments(
+                user_id=current_user.id,
+                date_created=datetime.now(),
+                time_related=real_timestamp,
+                mat_file=filename,
+                content=comment,
+                is_private=is_private,
+            )
+            db_sess.add(comment)
+            db_sess.commit()
+            db_sess = db_session.create_session()
+            comments = db_sess.query(Comments).filter(Comments.mat_file == filename).all()
+            print(comments)
+            return render_template('main.html', he=current_user, load=True, we_are_home=True, comments=comments)
+    db_sess = db_session.create_session()
+    comments = db_sess.query(Comments).filter(Comments.mat_file == filename).all()
+    print(comments)
+    return render_template('main.html', he=current_user, load=True, we_are_home=True, comments=comments)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -379,6 +402,7 @@ def register():
         print("-" * 50, "New user is created", "-" * 50, sep="\n")
         profile_img = requests.get('http://www.gravatar.com/avatar/' + md5(
             form.email.data.encode()).hexdigest() + '?d=identicon&s=200').content
+
         user = User(
             nickname=form.nickname.data.lower(),
             name=form.name.data,
@@ -390,14 +414,15 @@ def register():
         db_sess.add(user)
         db_sess.commit()
 
-        info = user.info()
-        admins = db_sess.query(User).filter(User.is_admin).all()
-        admin_mails = [_.email for _ in admins]
-
-        send_email(admin_mails, '[PGI] New user',
-                   plain_text=f'Зарегистрировался новый пользователь со следующими данными: {info}')
+        # info = user.info()
+        # admins = db_sess.query(User).filter(User.is_admin).all()
+        # admin_mails = [_.email for _ in admins]
 
         return redirect('/login')
+
+        # send_email(admin_mails, '[PGI] New user',
+        #           plain_text=f'Зарегистрировался новый пользователь со следующими данными: {info}')
+        # return redirect('/login')
     return render_template('register.html', title='Регистрация', form=form)
 
 
@@ -440,7 +465,6 @@ def reset_password_request():
             return render_template('reset_password_request.html',
                                    title='Reset Password', form=form,
                                    message="Пользователь не существует")
-        # flash('Check your email for the instructions to reset your password')
         return redirect(f'/forgot_password/ok/{curr_user.nickname}')
     return render_template('reset_password_request.html',
                            title='Reset Password', form=form)
@@ -465,14 +489,20 @@ def logout():
 
 @app.errorhandler(404)
 def abort_if_not_found(error):
+    print(error)
     return render_template('404.html')
+
+
+@app.errorhandler(500)
+def show_error(error):
+    print(error)
+    return render_template('500.html')
 
 
 def save_picture(form_picture, user_nickname):
     random_hex = "".join(random.sample(string.ascii_letters + string.digits, 10))
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.nickname == user_nickname).first()
-
 
 
 @app.route('/users/<nickname>', methods=['GET', 'POST'])
@@ -488,7 +518,7 @@ def user(nickname):
             return redirect("/")
         profile_pic = (base64.b64encode(user.profile_photo)).decode("utf-8")
         return render_template('user/user.html', user=user, he=current_user,
-                               profile_pic=profile_pic, form=form)
+                               profile_pic=profile_pic, form=form, title='Redact profile')
     else:
         if form.validate_on_submit():
             if form.picture.data:
@@ -499,7 +529,8 @@ def user(nickname):
                     profile_pic = (base64.b64encode(user.profile_photo)).decode("utf-8")
                     return render_template('user/user.html', user=user,
                                            profile_pic=profile_pic, form=form, he=current_user,
-                                           error_msg=['That username is taken. Please choose a different one.'])
+                                           error_msg=['That username is taken. Please choose a different one.'],
+                                           title='Redact profile')
                 else:
                     user.nickname = form.nickname.data
             else:
@@ -511,7 +542,8 @@ def user(nickname):
                     profile_pic = (base64.b64encode(user.profile_photo)).decode("utf-8")
                     return render_template('user/user.html', user=user,
                                            profile_pic=profile_pic, form=form, he=current_user,
-                                           error_msg=['That email is taken. Please choose a different one.'])
+                                           error_msg=['That email is taken. Please choose a different one.'],
+                                           title='Redact profile')
                 else:
                     user.email = form.email.data
             else:
@@ -530,18 +562,21 @@ def user(nickname):
 def all_data_files():
     files_list = []
     for filename in os.listdir('static/mat/'):
-        if not filename.startswith('.'):
-            abs_path = os.path.abspath(os.path.join('static/mat/', filename))
-            print("Abs path is", abs_path)
-            bytes_size = os.path.getsize(abs_path)
-            norm_syze: str = human_readable_file_size(bytes_size)
-            files_list.append((filename, norm_syze, abs_path))
-    files_list.sort(key=lambda _: _[0])
-    return render_template('all_data_files.html', files_list=files_list, count=1, he=current_user)
+        if not filename.endswith('.mat') or filename.startswith("."):
+            continue
+        abs_path = os.path.abspath(os.path.join('static/mat/', filename))
+        print("Abs path is", abs_path)
+        bytes_size = os.path.getsize(abs_path)
+        norm_syze: str = human_readable_file_size(bytes_size)
+        files_list.append((filename, norm_syze, abs_path))
+    files_list.sort(key=lambda _: _[0], reverse=True)
+    return render_template('all_data_files.html', files_list=files_list, count=1, he=current_user,
+                           title='All PGI files')
 
 
 if __name__ == "__main__":
-    app.run('0.0.0.0', port=5000, debug=True)
+    # app.run('0.0.0.0', port=5000, debug=True)
+    app.run('127.0.0.1', port=5000, debug=True)
     # serve(app, host='0.0.0.0', port=5000)
     if server:
         server.quit()

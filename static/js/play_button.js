@@ -11,14 +11,14 @@ $(document).ready(function () {
         if (button_play.title === "Stop") {
             clearInterval(nIntervId);
             nIntervId = null;
-            button_play.title = "Play"
+            button_play.title = "Play";
         } else {
-            console.log("dfgfgfge")
-            button_play.title = "Stop"
+            console.log("Stopped playing..")
+            button_play.title = "Stop";
             console.log(button_play.title)
         }
 
-        // check if already an interval has been set up
+        // check if an interval has been set up already
 
     }
 
@@ -38,7 +38,5 @@ $(document).ready(function () {
             success: window.funcSucces
         })
     }
-
-
     document.getElementById("play").addEventListener("click", active);
 })

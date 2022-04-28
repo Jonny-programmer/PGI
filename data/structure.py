@@ -64,12 +64,12 @@ class Comments(SqlAlchemyBase):
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
     user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
-    created_date = sqlalchemy.Column(sqlalchemy.DateTime,
+    date_created = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
-    unix_time = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
-    mat_file = sqlalchemy.Column(sqlalchemy.String)
+    time_related = sqlalchemy.Column(sqlalchemy.DateTime, nullable=False)
+    mat_file = sqlalchemy.Column(sqlalchemy.String, index=True)
     content = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-
+    is_private = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     # Свящь с таблицей Users
     user = orm.relation('User')
 

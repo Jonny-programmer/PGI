@@ -2,8 +2,6 @@
 
 <!-- HERE STARTS THE ACTUAL DESIGN OF MAIN PAGE -->
 {% block content %}
-
-
 <script type="text/javascript" src="{{ url_for('static', filename='js/hm_buttons.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/play_button.js') }}"></script>
 
@@ -16,8 +14,11 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/calendar_settings.js') }}"></script>
 </div>
 
+<div class="block1 information-image">
+    <img src="{{ url_for('static', filename='img/info.png') }}"/>
+</div>
 
-<div class="block">
+<div class="block lightcurve">
     <h1>Light Curve</h1>
 
     <div class="personal_lightcurve_class">
@@ -31,6 +32,56 @@
         <div></div>
         <div></div>
     </div>
+    <br>
+    {% if comments %}
+    <ul class="list-group list-group-flush">
+        {% for comment in comments %}
+            <li class="list-group-item list-group-item-info">
+                {% include "user/comment.html" %}
+            </li>
+            <br>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if he.is_authenticated %}
+    <!-- Форма добавления комментария -->
+    <div class="form-wrapper">
+        <form method="post" action="">
+            <fieldset class="form-group">
+                <div class="content-group">
+                    <br>
+                    <legend class="border-bottom mb-4">Add your comment</legend>
+                    <div class="input-group mb-3 comments">
+                        <span class="input-group-text" id="basic-addon2">Time (press any point on the lightcurve): </span>
+                        <input name="timestamp" type="text" id="timestamp" class="timestamp unix-comment form-control" placeholder="UNIX timestamp" value="" readonly required/>
+                    </div>
+                    <div class="input-group">
+                        <textarea name="comment" id="comment" class="form-control" placeholder="Input your comment here..." required></textarea>
+                        <button type="submit" class="btn btn-warning btn-rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send-fill" viewBox="0 0 16 16">
+                                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
+                            </svg>
+                        </button>
+                        <script type="text/javascript" src="{{ url_for('static', filename='js/comments.js') }}"></script>
+                    </div>
+                    <p content="error" style="color:red" role="alert">
+                        {{ message }}
+                    </p>
+                    <div class="input-group-text">
+                        <input name="is_private" id="is_private" class="form-check-input mt-0 check" type="checkbox" value="True"/>
+                        <label for="is_private">Сделать комментарий доступным только мне</label>
+                    </div>
+                </div>
+                <br>
+            </fieldset>
+        </form>
+    </div>
+    {% else %}
+        <div class="alert alert-danger" role="alert">
+            Вам нужно <a href="{{ url_for('login') }}" class="alert-link">войти в аккаунт</a>, чтобы иметь возможность добавлять комментарии
+        </div>
+    {% endif %}
 </div>
 
 <div class="block">
@@ -47,7 +98,7 @@
             <div id="first_keogram_text" class="slider_text">a</div>
             <div id="second_keogram_text" class="slider_text">a</div>
             <div class="autoscale_button" id="autoscale_keogramm">
-                <button class="btn btn-primary">Autoscale</button>
+                <button class="autoscale btn btn-primary">Autoscale</button>
                 <script>
 
 
@@ -75,7 +126,6 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/keogramm_slider.js') }}"></script>
 </div>
 
-
 <div class="block">
     <h1>Frame</h1>
     <div class="something_and_slider">
@@ -89,7 +139,7 @@
             <div id="first_heatmap_text" class="slider_text">a</div>
             <div id="second_heatmap_text" class="slider_text">a</div>
             <div class="autoscale_button" id="autoscale_heatmap">
-                <button class="btn btn-primary">Autoscale</button>
+                <button class="autoscale1 btn btn-primary">Autoscale</button>
                 <script>
 
                     $(document).ready(function () {
@@ -137,7 +187,6 @@
         </div>
     </center>
 </div>
-
 
 <div class="block">
 </div>

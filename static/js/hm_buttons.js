@@ -36,11 +36,13 @@ window.firstSuccess = function (data) {
     Plotly.plot('heatmap_graph', heatmap_graph, {});
 
     let lightcurve_graph = JSON.parse(data['lightcurve']);
-    Plotly.plot('lightcurve_graph', lightcurve_graph, {});
+    console.log(lightcurve_graph);
+    let btn_list = ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d']
+    Plotly.plot('lightcurve_graph', lightcurve_graph, {modeBarButtonsToRemove: ['toImage']});
+    // fixme: modeBarButtonsToRemove do not work
 
 
-    lightcurve = document.getElementById('lightcurve_graph'),
-        hoverInfo = document.getElementById('hoverInfo')
+    lightcurve = document.getElementById('lightcurve_graph')
 
     lightcurve.on('plotly_click', function (data) {
         let x = data.points[0].x;
@@ -65,7 +67,116 @@ window.firstSuccess = function (data) {
         })
     })
 
+    lightcurve.on('plotly_relayout',
+        function (eventdata) {
+            console.log(eventdata);
+            if (eventdata['xaxis.autorange']) {
+                $.ajax({
+                    url: "/",
+                    type: 'POST',
+                    data: ({
+                        type: 'lightcurve_all_graph_event'
+                    }),
+                    datatype: 'text',
+                    success: window.lightcurveSucces
+                });
+            } else {
+                x0 = eventdata['xaxis.range[0]'];
+                x1 = eventdata['xaxis.range[1]'];
+                y0 = eventdata['yaxis.range[0]'];
+                y1 = eventdata['yaxis.range[1]'];
+
+                $.ajax({
+                    url: "/",
+                    type: 'POST',
+                    data: ({
+                        type: 'lightcurve_change',
+                        x0: x0,
+                        x1: x1,
+                        y0: y0,
+                        y1: y1
+                    }),
+                    datatype: 'text',
+                    success: window.lightcurveSucces
+                });
+
+            }
+        })
+
     $("#next").trigger('click');
+}
+
+
+window.lightcurveSucces = function (data) {
+    console.log(data);
+
+    $("#lightcurve_graph").remove();
+
+    $('<div>', {
+        id: 'lightcurve_graph'
+    }).appendTo("#lightcurve");
+
+
+    let lightcurve_graph = JSON.parse(data['lightcurve']);
+    console.log(lightcurve_graph);
+    Plotly.plot('lightcurve_graph', lightcurve_graph, {modeBarButtonsToRemove: ['toImage']});
+
+    lightcurve = document.getElementById('lightcurve_graph')
+
+    lightcurve.on('plotly_click', function (data) {
+        let x = data.points[0].x;
+        $.ajax({
+            url: "/",
+            type: 'POST',
+            data: ({
+                type: 'lightcurve_click_event',
+                x: x,
+                value0: window.value_heatmap0,
+                value1: window.value_heatmap1,
+                is_auto: window.is_heatmap_autoscale
+            }),
+            datatype: 'text',
+            success: window.funcSucces
+        })
+    })
+
+    lightcurve.on('plotly_relayout',
+        function (eventdata) {
+            console.log(eventdata);
+            if (eventdata['xaxis.autorange']) {
+                $.ajax({
+                    url: "/",
+                    type: 'POST',
+                    data: ({
+                        type: 'lightcurve_all_graph_event'
+                    }),
+                    datatype: 'text',
+                    success: window.lightcurveSucces
+                });
+            } else {
+                x0 = eventdata['xaxis.range[0]'];
+                x1 = eventdata['xaxis.range[1]'];
+                y0 = eventdata['yaxis.range[0]'];
+                y1 = eventdata['yaxis.range[1]'];
+
+                $.ajax({
+                    url: "/",
+                    type: 'POST',
+                    data: ({
+                        type: 'lightcurve_change',
+                        x0: x0,
+                        x1: x1,
+                        y0: y0,
+                        y1: y1
+                    }),
+                    datatype: 'text',
+                    success: window.lightcurveSucces
+                });
+
+            }
+        })
+
+
 }
 
 $(document).ready(function () {

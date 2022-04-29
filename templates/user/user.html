@@ -10,7 +10,7 @@
             <img class="rounded-circle account-img" src="{{ url_for('static', filename='img/profile_pics') }}/{{ user.profile_pic }}" />
             <div class="media-body">
                 <h2 class="media-heading">{{ user.name + " " + user.surname }}</h2>
-                <h5 class="media-heading">{{ user.nickname }}</h5>
+                <h5 class="media-heading">@{{ user.nickname }}</h5>
 
                 <p class="text-secondary">{{ user.email }}</p>
             </div>
@@ -32,9 +32,11 @@
                     </div>
                     <div class="form-group">
                         {{ form.nickname.label(class="form-control-label") }}
-
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="basic-addon1">@</span>
                         {% if form.nickname.errors %}
                             {{ form.nickname(type="text", class="form-control form-control-lg is-invalid", id="nickname", value=user.nickname) }}
+                        </div>
                             <div class="invalid-feedback">
                                 {% for error in form.nickname.errors %}
                                     <span class="text-danger">{{ error }}</span>
@@ -42,6 +44,7 @@
                             </div>
                         {% else %}
                             {{ form.nickname(type="text", class="form-control form-control-lg", id="nickname", value=user.nickname) }}
+                        </div>
                         {% endif %}
                     </div>
                     <div class="form-group">

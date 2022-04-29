@@ -660,6 +660,15 @@ def user(nickname):
             else:
                 user_profile.nickname = form.nickname.data
         else:
+            nick_ok_letters = ["_", ".", "-"] + [str(n) for n in range(10)] + \
+                              [chr(_) for _ in range(ord("A"), ord("Z") + 1)] + [chr(_) for _ in
+                                                                                 range(ord("a"), ord("z") + 1)]
+            for letter in form.nickname.data:
+                if letter not in nick_ok_letters:
+                    return render_template('user/user.html', user=user_profile,
+                                           form=form, he=current_user,
+                                           error_msg=['There are restricted symbols in the username'],
+                                           title='Redact profile')
             user_profile.nickname = form.nickname.data
 
         this_email_exists = db_sess.query(User).filter(User.email == form.email.data).first()

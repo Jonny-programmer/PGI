@@ -37,14 +37,10 @@ window.firstSuccess = function (data) {
 
     let lightcurve_graph = JSON.parse(data['lightcurve']);
     console.log(lightcurve_graph);
-    Plotly.plot('lightcurve_graph', lightcurve_graph, {});
+    let btn_list = ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d']
+    Plotly.plot('lightcurve_graph', lightcurve_graph, {modeBarButtonsToRemove: ['toImage']});
+    // fixme: modeBarButtonsToRemove do not work
 
-    // var data2 = {
-    //         x: [['2020-02-03T15:05:07']],
-    //         y: [[20]]
-    //     }
-    //
-    // Plotly.extendTraces("lightcurve_graph", data2, [0]);
 
     lightcurve = document.getElementById('lightcurve_graph')
 
@@ -114,13 +110,6 @@ window.firstSuccess = function (data) {
 window.lightcurveSucces = function (data) {
     console.log(data);
 
-    // var data = {
-    //         x: [['2020-02-03T15:05:07', '2010-02-03T15:05:07']],
-    //         y: [[20, 50]]
-    //     }
-
-    // Plotly.extendTraces("lightcurve_graph", data, [0]);
-
     $("#lightcurve_graph").remove();
 
     $('<div>', {
@@ -130,7 +119,7 @@ window.lightcurveSucces = function (data) {
 
     let lightcurve_graph = JSON.parse(data['lightcurve']);
     console.log(lightcurve_graph);
-    Plotly.plot('lightcurve_graph', lightcurve_graph, {});
+    Plotly.plot('lightcurve_graph', lightcurve_graph, {modeBarButtonsToRemove: ['toImage']});
 
     lightcurve = document.getElementById('lightcurve_graph')
 

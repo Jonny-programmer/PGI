@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 # Инициализируем все необходимые библиотеки
-import base64
 import io
 import mimetypes
 import os
@@ -44,7 +43,6 @@ import pandas as pd
 from human_readable_file_size import human_readable_file_size
 
 # Настраиваем SMTP_SERVER
-
 server = False
 load_dotenv()
 SMTP_HOST: str = os.environ["HOST"]
@@ -272,7 +270,8 @@ def load_user(user_id):
 
 @app.route("/", methods=["GET", "POST"])
 def main():
-    global file, UNIX_TIME, UNIX_TIME_2, q, data_hm, max_hm, UNIX_TIME_for_lightcurve, UNIX_TIME_2_for_lightcurve, filename
+    global file, UNIX_TIME, UNIX_TIME_2, q, data_hm, max_hm, UNIX_TIME_for_lightcurve
+    global UNIX_TIME_2_for_lightcurve, filename
     # db_sess = db_session.create_session()
     # here we can use
     # if current_user.is_authenticated:
@@ -303,12 +302,10 @@ def main():
                         current = max_hm - 1
             else:
                 x = request.values.get('x')
-                print(f'x: {x}')
                 if len(x.split('.')) > 1:
                     x = int(time.mktime(time.strptime(x, '%Y-%m-%d %H:%M:%S.%f'))) + 3 * 60 * 60
                 else:
                     x = int(time.mktime(time.strptime(x, '%Y-%m-%d %H:%M:%S'))) + 3 * 60 * 60
-                print(x)
 
                 def find_nearest(array, value):
                     array = np.asarray(array)
@@ -421,7 +418,6 @@ def main():
             UNIX_TIME_for_lightcurve = UNIX_TIME.copy()
             lightcurve_graph = Light_curve(UNIX_TIME_2)
             return {'lightcurve': lightcurve_graph}
-
         elif request.values.get('type') == 'wavelet_event':
             wavelet = file['cwt_global']
             local_q = 10000
@@ -439,9 +435,6 @@ def main():
             fig = px.imshow(wavelet_2, x=local_UNIX_TIME_2)
             fig.show()
             return ''
-
-
-
         else:
             db_sess = db_session.create_session()
             timestamp = request.values.get('timestamp')
@@ -456,7 +449,10 @@ def main():
                                        message='Please enter a comment')
             if is_private:
                 is_private = True
-            structed_time = time.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
+            try:
+                structed_time = time.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
+            except ValueError:
+                structed_time = time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
             real_timestamp = datetime.fromtimestamp(time.mktime(structed_time))
             comment = Comments(
                 user_id=current_user.id,
@@ -479,6 +475,11 @@ def main():
     comments = db_sess.query(Comments).filter_by(mat_file=filename).all()
     print(comments)
     return render_template('main.html', he=current_user, load=True, we_are_home=True, comments=comments)
+
+
+@app.route("/500")
+def five_hundred():
+    abort(500)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -600,7 +601,7 @@ def abort_if_not_found(error):
 @app.errorhandler(500)
 def show_error(error):
     print(error)
-    return render_template('500.html')
+    return render_template('500.html', he=current_user)
 
 
 def save_picture(user_form_picture, from_gravatar=None, previous_picture=None):

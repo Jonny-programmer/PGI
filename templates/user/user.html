@@ -30,10 +30,10 @@
                             {% endfor %}
                         {% endif %}
                     </div>
-                    <div class="form-group">
+                    <div class="form-group mb-3">
                         {{ form.nickname.label(class="form-control-label") }}
                         <div class="input-group mb-3">
-                            <span class="input-group-text" id="basic-addon1">@</span>
+                            <span class="input-group-text md-1" id="basic-addon1">@</span>
                         {% if form.nickname.errors %}
                             {{ form.nickname(type="text", class="form-control form-control-lg is-invalid", id="nickname", value=user.nickname) }}
                         </div>
@@ -47,7 +47,7 @@
                         </div>
                         {% endif %}
                     </div>
-                    <div class="form-group">
+                    <div class="form-group mb-3">
                         <div class="form-wrapper">
                             {{ form.name.label }}
                             {% if form.name.errors %}
@@ -61,6 +61,8 @@
                                 {{ form.name(type="text", class="form-control form-control-lg", id='name', value=user.name) }}
                             {% endif %}
                         </div>
+                    </div>
+                    <div class="form-group mb-3">
                         <div class="form-wrapper">
                             {{ form.surname.label }}
 
@@ -76,7 +78,7 @@
                             {% endif %}
                         </div>
                     </div>
-                    <div class="form-wrapper">
+                    <div class="form-wrapper mb-3">
                         {{ form.email.label }}
 
                         {% if form.email.errors %}

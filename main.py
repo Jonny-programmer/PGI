@@ -62,7 +62,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'users.login'
 
-
 db_session.global_init("db/users.db")  # Подключаем базу данных
 
 
@@ -200,7 +199,6 @@ def Keogram(max_min_values: list):  # Функция построения гра
 
 
 def Light_curve(UNIX_TIME_2, x_range=None, y_range=None, cord1=0, cord2=-1):  # Функция построения графика Light curve
-
     """
     :param UNIX_TIME_2: параметры времени по оси x
     :param x_range: по умолчанию none. если переданы x0 и x1 ставит область просмотра графика от x0 до x1
@@ -375,9 +373,7 @@ def main():
                 date_list.append(tpl)
 
             return {'data': tuple(date_list)}
-
         elif request.values.get('type') == 'lightcurve_change':
-
             x0 = 'T'.join(request.values.get('x0').split())
             x1 = 'T'.join(request.values.get('x1').split())
             y0 = float(request.values.get('y0'))
@@ -413,11 +409,11 @@ def main():
             UNIX_TIME_2_for_lightcurve = UNIX_TIME_2_for_lightcurve.reshape(-1, q)[:, 0]
             UNIX_TIME_2_for_lightcurve = pd.to_datetime(pd.Series(UNIX_TIME_2_for_lightcurve), unit='s').to_numpy()
 
-            lightcurve_graph = Light_curve(UNIX_TIME_2_for_lightcurve, x_range=x_range, y_range=y_range, cord1=current_x_0,
-                              cord2=current_x_1)
+            lightcurve_graph = Light_curve(UNIX_TIME_2_for_lightcurve, x_range=x_range, y_range=y_range,
+                                           cord1=current_x_0,
+                                           cord2=current_x_1)
 
             return {'lightcurve': lightcurve_graph}
-
         elif request.values.get('type') == 'lightcurve_all_graph_event':
             q = 6200
 
@@ -433,14 +429,13 @@ def main():
             a = np.zeros(local_q - UNIX_TIME.shape[0] % local_q if UNIX_TIME.shape[0] % local_q else 0)
             local_UNIX_TIME_2 = np.concatenate((UNIX_TIME, a)).reshape(-1, local_q)[:, 0]
             local_UNIX_TIME_2 = pd.to_datetime(pd.Series(local_UNIX_TIME_2), unit='s').to_numpy()
-            print('texttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttext')
+
             wavelet_2 = signal.decimate(wavelet,
-                                            q=local_q,  # выход будет в q раз меньше
-                                            ftype='fir'
-                                            # Используется функция фильтра с конечной импульсной характеристикой
-                                            )
-            print(
-                'texttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttext')
+                                        q=local_q,  # выход будет в q раз меньше
+                                        ftype='fir',
+                                        n=5
+                                        # Используется функция фильтра с конечной импульсной характеристикой
+                                        )
             fig = px.imshow(wavelet_2, x=local_UNIX_TIME_2)
             fig.show()
             return ''

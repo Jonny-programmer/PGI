@@ -50,6 +50,12 @@ window.firstSuccess = function (data) {
 
     lightcurve.on('plotly_click', function (data) {
         let x = data.points[0].x;
+        try {
+            $('#timestamp').val(x);
+        }
+        catch (TypeError) {
+            console.log('Okay, this happened again: x is now', typeof x)
+        };
         $.ajax({
             url: "/",
             type: 'POST',
@@ -102,7 +108,6 @@ window.firstSuccess = function (data) {
         })
 
     $("#next").trigger('click');
-
 }
 
 

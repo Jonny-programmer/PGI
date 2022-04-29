@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 	<meta charset="utf-8">
-	<title>Not main page</title>
+	<title>{{ title }}</title>
 	<meta name="description" content="Data from UV telescope located in PGI observatory for the analysis of auroras">
     <?include($_SERVER["DOCUMENT_ROOT"]."../block/bot_block_ip.php");?>
     <!-- Смотри https://habr.com/ru/post/659811/ -->
@@ -38,36 +38,39 @@
                 <img src="{{url_for('static', filename='img/logo.png')}}">
                 Лаборатория космических лучей<br> предельно высоких энергий НИИЯФ МГУ</a>
             </div>
-        </div>
-        <br>
-        <main role="main" class="container">
-            <div class="row">
-                <div class="col-md-4 justify-content-left">
-                    <div class="content-section">
-                        <h3>Our Sidebar</h3>
-                        <p class='text-muted'>You can put any information here you'd like.
-                          <ul class="list-group">
-                            <li class="list-group-item list-group-item-light">Latest Posts</li>
-                            <li class="list-group-item list-group-item-light">Announcements</li>
-                            <li class="list-group-item list-group-item-light">Calendars</li>
-                            <li class="list-group-item list-group-item-light">etc</li>
-                          </ul>
-                        </p>
-                    </div>
+    </div>
+    <br>
+
+    <main role="main" class="container">
+        <div class="row">
+            <!--
+            <div class="col-md-4 justify-content-left">
+                <div class="content-section">
+                    <h3>Our Sidebar</h3>
+                    <p class='text-muted'>You can put any information here you'd like.
+                      <ul class="list-group">
+                        <li class="list-group-item list-group-item-light">Latest Posts</li>
+                        <li class="list-group-item list-group-item-light">Announcements</li>
+                        <li class="list-group-item list-group-item-light">Calendars</li>
+                        <li class="list-group-item list-group-item-light">etc</li>
+                      </ul>
+                    </p>
                 </div>
-                <div class="col-md-8">
-                    {% block content %}{% endblock %}
-                </div>
+            </div> -->
+            <div class="col-md-8 center">
+                {% block content %}{% endblock %}
             </div>
-        </main>
-
-
-        <div class="footer">
-            <div class="center">
-                <div class="cop" align="left">
-                    <strong >Главная страница, 2022</strong><br>
-                    <em>ЛЕНИНСКИЕ ГОРЫ Д.1, СТР. 6</em>
-                    <span>|</span><a href="https://uhecr.sinp.msu.ru/ru/kontakty.html"> Контакты</a>
+        </div>
+    </main>
+    <div class="footer-wrapper">
+        <div class="footer-content">
+            <div class="footer">
+                <div class="center">
+                    <div class="cop" align="left">
+                        <strong >Главная страница, 2022</strong><br>
+                        <em>ЛЕНИНСКИЕ ГОРЫ Д.1, СТР. 6</em>
+                        <span>|</span><a href="https://uhecr.sinp.msu.ru/ru/kontakty.html"> Контакты</a>
+                    </div>
                 </div>
             </div>
         </div>

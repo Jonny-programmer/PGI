@@ -104,6 +104,26 @@ window.firstSuccess = function (data) {
         })
 
     $("#next").trigger('click');
+
+    let comments = data['comments'];
+
+    console.log($('#all_comment_parts').text());
+
+//    comments.forEach(function(value) {
+//
+//
+//
+//    }
+//        $('#comments').append("""
+//            <li class="list-group-item list-group-item-info">
+//
+//
+//
+//            </li>
+//            <br>
+//        """)
+//    })
+
 }
 
 

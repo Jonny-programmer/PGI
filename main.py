@@ -277,11 +277,28 @@ def main():
     # if current_user.is_authenticated:
     if request.method == 'POST':
         if request.values.get('type') == 'first_event':
+            db_sess = db_session.create_session()
+            comments = db_sess.query(Comments).filter_by(mat_file=filename).all()
+
+            comments_dict = {}
+            for i in range(len(comments)):
+                comment = comments[i]
+                profile_pic = comment.user.profile_pic
+                name = comment.user.name
+                surname = comment.user.surname
+                nickname = comment.user.nickname
+                content = comment.content
+                time_related = comment.time_related
+                date_created = comment.date_created
+
+                comments_dict[str(i)] = (profile_pic, name, surname, nickname, content, time_related, date_created)
+
             heatmap_graph = Heatmap(1, [20000, 200000])
             keogram_graph = Keogram([20000, 200000])
 
             lightcurve_graph = Light_curve(UNIX_TIME_2)
-            result = {'heatmap': heatmap_graph, 'keogram': keogram_graph, 'lightcurve': lightcurve_graph}
+            result = {'heatmap': heatmap_graph, 'keogram': keogram_graph, 'lightcurve': lightcurve_graph,
+                      'comments': comments_dict}
             return result
         elif request.values.get('type') == 'keogram_slider_event':
             values = [int(request.values.get('value0')), int(request.values.get('value1'))]
@@ -435,7 +452,7 @@ def main():
             fig = px.imshow(wavelet_2, x=local_UNIX_TIME_2)
             fig.show()
             return ''
-        else:
+        elif request.values.get('type') is None:
             db_sess = db_session.create_session()
             timestamp = request.values.get('timestamp')
             # 2022-02-03 17:46:12
@@ -471,10 +488,7 @@ def main():
                 print(f"---> {comment.mat_file}")
             print(f"filename is {filename}")
             return render_template('main.html', he=current_user, load=True, we_are_home=True, comments=comments)
-    db_sess = db_session.create_session()
-    comments = db_sess.query(Comments).filter_by(mat_file=filename).all()
-    print(comments)
-    return render_template('main.html', he=current_user, load=True, we_are_home=True, comments=comments)
+    return render_template('main.html', he=current_user, load=True, we_are_home=True)
 
 
 @app.route("/500")

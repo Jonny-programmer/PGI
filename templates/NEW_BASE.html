@@ -4,8 +4,6 @@
 	<meta charset="utf-8">
 	<title>{{ title }}</title>
 	<meta name="description" content="Data from UV telescope located in PGI observatory for the analysis of auroras">
-    <?include($_SERVER["DOCUMENT_ROOT"]."../block/bot_block_ip.php");?>
-    <!-- Смотри https://habr.com/ru/post/659811/ -->
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
@@ -58,6 +56,33 @@
                 </div>
             </div> -->
             <div class="col-md-8 center">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <div id="liveAlertPlaceholder">
+                            <div class="alert alert-{{ category }} alert-dismissible" role="alert">
+                                {{ message }}
+                                <button id="remove-alert" type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                <script type="text/javascript">
+                                    var closeAlert = document.getElementById('remove-alert')
+
+                                    if (closeAlert) {
+                                        closeAlert.addEventListener('click', function() {
+                                            remove()
+                                        })
+                                    }
+                                    function remove() {
+                                        var div = document.getElementById("liveAlertPlaceholder");
+                                        div.parentNode.removeChild(div);
+                                    }
+                                </script>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
                 {% block content %}{% endblock %}
             </div>
         </div>

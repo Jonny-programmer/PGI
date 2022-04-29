@@ -10,6 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from config import SECRET_KEY
 from .db_session import SqlAlchemyBase
 
+
 ROLE_USER = 0
 ROLE_ADMIN = 1
 
@@ -26,7 +27,7 @@ class User(SqlAlchemyBase, UserMixin):
     last_seen = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     is_admin = sqlalchemy.Column(sqlalchemy.SmallInteger, default=ROLE_USER)
 
-    profile_photo = sqlalchemy.Column(sqlalchemy.BLOB)
+    profile_pic = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     # Связь с таблицей Comments
     comments = orm.relation("Comments", back_populates='user')
     

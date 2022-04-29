@@ -7,7 +7,7 @@
 <div class="block">
     <div class="content-section">
         <div class="media">
-            <img class="rounded-circle account-img" src="data:image/ ;base64, {{ profile_pic }}" />
+            <img class="rounded-circle account-img" src="{{ url_for('static', filename='img/profile_pics') }}/{{ user.profile_pic }}" />
             <div class="media-body">
                 <h2 class="media-heading">{{ user.name + " " + user.surname }}</h2>
                 <h5 class="media-heading">{{ user.nickname }}</h5>
@@ -16,25 +16,14 @@
             </div>
         </div>
         <!-- FORM here -->
-        <div class="upload-container">
-            <img id="upload-image" src="{{ url_for('static', filename='img/upload.jpeg') }}">
-            <div>
-                <input id="file-input" type="file" name="file" accept="image/png, image/jpeg"
-                       method="post"/>
-                <label for="file-input">Выберите файл</label>
-                <span>или перетащите его сюда</span><br><br>
-            </div>
-        </div>
-        <script type="text/javascript" src="{{ url_for('static', filename='js/drag_and_drop.js') }}"></script>
-
         <div class="content-section justify-content-center">
             <form method="post" action="" enctype="multipart/form-data">
                 {{ form.hidden_tag() }}
                 <fieldset class="form-group">
                     <legend class="border-bottom mb-4">Accout Info</legend>
-                    <div class="form-group">
+                    <div class="form-group mb-3">
                         {{ form.picture.label() }}
-                        {{ form.picture(class='form-control-file') }}
+                        {{ form.picture(class='form-control', type='file', value=user.profile_photo, accept="image/png, image/jpeg") }}
                         {% if form.picture.errors %}
                             {% for error in form.picture.errors %}
                                 <span class="text-danger">{{ error }}</span><br>

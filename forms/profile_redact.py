@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired, Email, Length
 
 
 class UpdateAccountForm(FlaskForm):
-    picture = FileField('Обновить фото профиля', validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
+    picture = FileField('Обновить фото профиля', validators=[FileAllowed(['jpeg', 'png'])])
     nickname = StringField('Имя пользователя', validators=[DataRequired(), Length(min=4, max=20)])
 
     name = StringField('Ваше имя', validators=[DataRequired()])

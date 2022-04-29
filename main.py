@@ -1,14 +1,14 @@
+# -*- encoding: utf-8 -*-
 # Инициализируем все необходимые библиотеки
 import base64
+import io
 import mimetypes
 import os
 import smtplib
-import string
-
+import uuid as uuid
 import time
-from random import random
-import random
 
+from PIL import Image
 from datetime import datetime
 from email import encoders
 from email.mime.audio import MIMEAudio
@@ -24,6 +24,7 @@ import numpy as np
 import plotly
 import plotly.express as px
 import requests
+from werkzeug.utils import secure_filename
 from flask import *
 from flask import Flask, render_template, redirect
 from flask import request
@@ -61,6 +62,9 @@ login_manager.init_app(app)
 login_manager.login_view = 'users.login'
 
 
+db_session.global_init("db/users.db")  # Подключаем базу данных
+
+
 def create_mail_server():
     global server
     server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
@@ -68,9 +72,6 @@ def create_mail_server():
     password = os.getenv("PASSWORD")
     server.connect(SMTP_HOST, SMTP_PORT)
     server.login(addr_from, password)
-
-
-db_session.global_init("db/users.db")  # Подключаем базу данных
 
 
 def send_async_email(app, msg):
@@ -244,7 +245,7 @@ def reset_password(token):
         # Устанавливаем новый пароль
         curr_user.set_password(form.password.data)
         db_sess.commit()
-        flash('Your password has been reset.')
+        flash('Your password has been reset.', 'info')
         return redirect(url_for('login'))
     return render_template('reset_password.html', form=form)
 
@@ -261,8 +262,6 @@ def main():
     # db_sess = db_session.create_session()
     # here we can use
     # if current_user.is_authenticated:
-
-    # return render_template('main.html', he=current_user, load=True)
     if request.method == 'POST':
         if request.values.get('type') == 'first_event':
             heatmap_graph = Heatmap(1, [20000, 200000])
@@ -367,11 +366,14 @@ def main():
             db_sess.add(comment)
             db_sess.commit()
             db_sess = db_session.create_session()
-            comments = db_sess.query(Comments).filter(Comments.mat_file == filename).all()
+            comments = db_sess.query(Comments).filter_by(mat_file=filename).all()
             print(comments)
+            for comment in comments:
+                print(f"---> {comment.mat_file}")
+            print(f"filename is {filename}")
             return render_template('main.html', he=current_user, load=True, we_are_home=True, comments=comments)
     db_sess = db_session.create_session()
-    comments = db_sess.query(Comments).filter(Comments.mat_file == filename).all()
+    comments = db_sess.query(Comments).filter_by(mat_file=filename).all()
     print(comments)
     return render_template('main.html', he=current_user, load=True, we_are_home=True, comments=comments)
 
@@ -401,17 +403,16 @@ def register():
 
         print("-" * 50, "New user is created", "-" * 50, sep="\n")
         profile_img = requests.get('http://www.gravatar.com/avatar/' + md5(
-            form.email.data.encode()).hexdigest() + '?d=identicon&s=200').content
-
-        user = User(
+            form.email.data.encode()).hexdigest() + '?d=identicon&s=125').content
+        new_user = User(
             nickname=form.nickname.data.lower(),
             name=form.name.data,
             surname=form.surname.data,
             email=form.email.data,
-            profile_photo=profile_img,
+            profile_pic=save_picture(profile_img, from_gravatar=True),
         )
-        user.set_password(form.password.data)
-        db_sess.add(user)
+        new_user.set_password(form.password.data)
+        db_sess.add(new_user)
         db_sess.commit()
 
         # info = user.info()
@@ -499,76 +500,96 @@ def show_error(error):
     return render_template('500.html')
 
 
-def save_picture(form_picture, user_nickname):
-    random_hex = "".join(random.sample(string.ascii_letters + string.digits, 10))
-    db_sess = db_session.create_session()
-    user = db_sess.query(User).filter(User.nickname == user_nickname).first()
+def save_picture(user_form_picture, from_gravatar=None, previous_picture=None):
+    if previous_picture:
+        try:
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], previous_picture))
+        except FileNotFoundError:
+            print("NOT ACHIEVED IN DELETING PREVIOUS IMAGE!!!!")
+    output_size = (125, 125)
+    if from_gravatar:
+        # Set UUID
+        pic_name = str(uuid.uuid1()) + "_" + "default_avatar.png"
+        pic_full_path = os.path.join(app.config['UPLOAD_FOLDER'], pic_name)
+        i = Image.open(io.BytesIO(user_form_picture))
+    else:
+        pic_filename = secure_filename(user_form_picture.filename)
+        # Set UUID
+        pic_name = str(uuid.uuid1()) + "_" + pic_filename.replace(" ", "_")
+        # Save that image
+        pic_full_path = os.path.join(app.config['UPLOAD_FOLDER'], pic_name)
+        i = Image.open(user_form_picture)
+    # Сжимаем изображение до определенного размера
+    i.thumbnail(output_size)
+    i.save(pic_full_path)
+    return pic_name
 
 
 @app.route('/users/<nickname>', methods=['GET', 'POST'])
 def user(nickname):
     db_sess = db_session.create_session()
-    user = db_sess.query(User).filter(User.nickname == nickname.lower()).first()
+    user_profile = db_sess.query(User).filter_by(nickname=nickname.lower()).first()
     form = UpdateAccountForm()
     if request.method == 'GET':
-        if not current_user.is_authenticated:
+        if not current_user.is_authenticated or nickname.lower() != current_user.nickname.lower():
             abort(404)
-        if not user:
+        if not user_profile:
             flash('User ' + nickname + ' not found.', 'warning')
             return redirect("/")
-        profile_pic = (base64.b64encode(user.profile_photo)).decode("utf-8")
-        return render_template('user/user.html', user=user, he=current_user,
-                               profile_pic=profile_pic, form=form, title='Redact profile')
-    else:
-        if form.validate_on_submit():
-            if form.picture.data:
-                pass
-            same_nicks_exist = db_sess.query(User).filter(User.nickname == form.nickname.data).first()
-            if same_nicks_exist:
-                if same_nicks_exist.nickname != current_user.nickname:
-                    profile_pic = (base64.b64encode(user.profile_photo)).decode("utf-8")
-                    return render_template('user/user.html', user=user,
-                                           profile_pic=profile_pic, form=form, he=current_user,
-                                           error_msg=['That username is taken. Please choose a different one.'],
-                                           title='Redact profile')
-                else:
-                    user.nickname = form.nickname.data
-            else:
-                user.nickname = form.nickname.data
+        return render_template('user/user.html', user=user_profile, he=current_user,
+                               form=form, title='Redact profile')
 
-            this_email_exists = db_sess.query(User).filter(User.email == form.email.data).first()
-            if this_email_exists:
-                if this_email_exists.email != current_user.email:
-                    profile_pic = (base64.b64encode(user.profile_photo)).decode("utf-8")
-                    return render_template('user/user.html', user=user,
-                                           profile_pic=profile_pic, form=form, he=current_user,
-                                           error_msg=['That email is taken. Please choose a different one.'],
-                                           title='Redact profile')
-                else:
-                    user.email = form.email.data
-            else:
-                user.email = form.email.data
-            user.name = form.name.data
-            user.surname = form.surname.data
-            db_sess.add(user)
+    if form.validate_on_submit():
+        if form.picture.data:
+            # Saving new image name to db
+            new_image_path = save_picture(form.picture.data, previous_picture=user_profile.profile_pic)
+            user_profile.profile_pic = new_image_path
+            db_sess.add(user_profile)
             db_sess.commit()
-            flash('Your account has been updated!', 'success')
-            return redirect(f'/users/{form.nickname.data}')
+            print("=" * 50, "Success!!", "*" * 50, sep="\n")
+        same_nicks_exist = db_sess.query(User).filter(User.nickname == form.nickname.data).first()
+        if same_nicks_exist:
+            if same_nicks_exist.nickname != current_user.nickname:
+                return render_template('user/user.html', user=user_profile,
+                                       form=form, he=current_user,
+                                       error_msg=['That username is taken. Please choose a different one.'],
+                                       title='Redact profile')
+            else:
+                user_profile.nickname = form.nickname.data
         else:
-            pass
+            user_profile.nickname = form.nickname.data
+
+        this_email_exists = db_sess.query(User).filter(User.email == form.email.data).first()
+        if this_email_exists:
+            if this_email_exists.email != current_user.email:
+                return render_template('user/user.html', user=user_profile,
+                                       form=form, he=current_user,
+                                       error_msg=['That email is taken. Please choose a different one.'],
+                                       title='Redact profile')
+            else:
+                user_profile.email = form.email.data
+        else:
+            user_profile.email = form.email.data
+        user_profile.name = form.name.data
+        user_profile.surname = form.surname.data
+        db_sess.add(user_profile)
+        db_sess.commit()
+        flash('Your account has been updated!', 'success')
+        return redirect(f'/users/{form.nickname.data}')
+    return redirect(f"/users/{nickname}")
 
 
 @app.route('/all_data_files')
 def all_data_files():
     files_list = []
-    for filename in os.listdir('static/mat/'):
-        if not filename.endswith('.mat') or filename.startswith("."):
+    for file_name in os.listdir('static/mat/'):
+        if not file_name.endswith('.mat') or file_name.startswith("."):
             continue
-        abs_path = os.path.abspath(os.path.join('static/mat/', filename))
+        abs_path = os.path.abspath(os.path.join('static/mat/', file_name))
         print("Abs path is", abs_path)
         bytes_size = os.path.getsize(abs_path)
         norm_syze: str = human_readable_file_size(bytes_size)
-        files_list.append((filename, norm_syze, abs_path))
+        files_list.append((file_name, norm_syze, abs_path))
     files_list.sort(key=lambda _: _[0], reverse=True)
     return render_template('all_data_files.html', files_list=files_list, count=1, he=current_user,
                            title='All PGI files')

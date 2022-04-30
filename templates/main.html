@@ -64,7 +64,7 @@
     </div>
     <br>
     {% if comments %}
-    <ul class="list-group list-group-flush">
+    <ul class="list-group list-group-flush" id="comments">
         {% for comment in comments %}
         <li class="list-group-item list-group-item-info">
             {% include "user/comment.html" %}

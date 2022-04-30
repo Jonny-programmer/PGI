@@ -1,31 +1,33 @@
-<link rel="stylesheet" href="../../static/css/comment.css"/>
+<div class="all_comment_parts">
+    <link rel="stylesheet" href="../../static/css/comment.css"/>
 
-<div class="comment-wrapper" align="center">
-    <div class="row">
-        <div class="col-2" align="content">
-            <img align="left" class="rounded-circle account-img" src="{{ url_for('static', filename='img/profile_pics') }}/{{ comment.user.profile_pic }}"/>
-        </div>
-        <div class="col-8" align="left">
-            <div class="row field-group">
-                <span style="float:left">
-                    <h3><b>{{ comment.user.name }} {{ comment.user.surname }}</b></h3>
-                </span>
+    <div class="comment-wrapper" align="center">
+        <div class="row">
+            <div class="col-2" align="content">
+                <img align="left" class="rounded-circle account-img" src="{{ url_for('static', filename='img/profile_pics') }}/{{ comment.user.profile_pic }}"/>
             </div>
-            <div class="row">
-                <h6>@{{ comment.user.nickname }}</h6>
+            <div class="col-8" align="left">
+                <div class="row field-group">
+                    <span style="float:left">
+                        <h3><b>{{ comment.user.name }} {{ comment.user.surname }}</b></h3>
+                    </span>
+                </div>
+                <div class="row">
+                    <h6>@{{ comment.user.nickname }}</h6>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <p>{{ comment.content }}
-        </p>
-    </div>
-    <div class="field-group">
-        <span style="float:left">
-            <label class="date"><em>Time related - {{ comment.time_related }}</em></label>
-        </span>
-        <span style="float:right">
-            <label class="date" ><em>Date created - {{ comment.date_created }}</em></label>
-        </span>
+        <div class="row">
+            <p>{{ comment.content }}
+            </p>
+        </div>
+        <div class="field-group">
+            <span style="float:left">
+                <label class="date"><em>Time related - {{ comment.time_related }}</em></label>
+            </span>
+            <span style="float:right">
+                <label class="date" ><em>Date created - {{ comment.date_created }}</em></label>
+            </span>
+        </div>
     </div>
 </div>

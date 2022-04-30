@@ -4,7 +4,8 @@
 
 [Data files](https://disk.yandex.ru/d/YRy6chw4OumnOw)
 
-> Download all the files directly in the /static/mat/ folder, they are already added to .gitignore
+> Download all the files directly in the /static/mat/ folder, they are already added to .gitignore.
+> Only files that end to -d3.mat are okay
 
 2) Usage example:
 
@@ -17,3 +18,13 @@ pip install -r requirements.txt
 ```commandline
 python3 main.py
 ```
+4) If you want to start the app normally, you need to create .env file (in root dir):
+```commandline
+HOST=smtp.yandex.ru
+PORT=465
+FROM=<your-email-address>@yandex.ru
+PASSWORD=<your-yandex-app-password>
+```
+You can get a yandex app password [here](https://passport.yandex.ru/profile/)
+> В разделе "Пароли и авторизация" выберите "Включить пароли приложений."
+> Подтвердите действие и нажмите "Создать новый пароль."

@@ -30,6 +30,8 @@ window.funcSucces = function (data) {
 
 window.firstSuccess = function (data) {
 
+    $( ".list-group-item" ).remove();
+
     let heatmap_graph = JSON.parse(data['heatmap']);
     let keogramm_graph = JSON.parse(data['keogram']);
     Plotly.plot('keogram_graph', keogramm_graph, {});
@@ -48,10 +50,10 @@ window.firstSuccess = function (data) {
         let x = data.points[0].x;
         try {
             $('#timestamp').val(x);
-        }
-        catch (TypeError) {
+        } catch (TypeError) {
             console.log('Okay, this happened again: x is now', typeof x)
-        };
+        }
+        ;
         $.ajax({
             url: "/",
             type: 'POST',
@@ -107,22 +109,58 @@ window.firstSuccess = function (data) {
 
     let comments = data['comments'];
 
-    console.log($('#all_comment_parts').text());
+    console.log(comments);
 
-//    comments.forEach(function(value) {
-//
-//
-//
-//    }
-//        $('#comments').append("""
-//            <li class="list-group-item list-group-item-info">
-//
-//
-//
-//            </li>
-//            <br>
-//        """)
-//    })
+
+    var format = function (str, col) {
+        console.log(col)
+        let values = ['profile_pic', 'name', 'surname', 'nickname', 'content', 'time_related', 'date_created'];
+        let i = 0
+        values.forEach(function (value) {
+            console.log('{{ ' + value + ' }}')
+            str = str.replace('{{ ' + value + ' }}', col[i]);
+            i++;
+        })
+        return str;
+    };
+
+    comments.forEach(function (comment) {
+        let text = `
+            <li class="list-group-item list-group-item-info">
+                <link rel="stylesheet" href="../../static/css/comment.css"/>
+                <div class="comment-wrapper" align="center">
+                    <div class="row">
+                        <div class="col-2" align="content">
+                            <img align="left" class="rounded-circle account-img" src="/static/img/profile_pics/${comment[0]}"/>
+                        </div>
+                        <div class="col-8" align="left">
+                            <div class="row field-group">
+                                <span style="float:left">
+                                    <h3><b>${comment[1]} ${comment[2]}</b></h3>
+                                </span>
+                            </div>
+                            <div class="row">
+                                <h6>@${comment[3]}</h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <p>${comment[4]}
+                        </p>
+                    </div>
+                    <div class="field-group">
+                        <span style="float:left">
+                            <label class="date"><em>Time related - ${comment[5]}</em></label>
+                        </span>
+                        <span style="float:right">
+                            <label class="date" ><em>Date created - ${comment[6]}</em></label>
+                        </span>
+                    </div>
+                </div>
+            </li>`
+        $(' #comments ').append(text);
+    })
+
 
 }
 
@@ -209,3 +247,66 @@ $(document).ready(function () {
 })
 
 window.is_heatmap_autoscale = false;
+
+
+$(document).ready(function () {
+    $(" #form_submit ").bind("click", function () {
+        console.log($("#timestamp").val())
+        console.log($(' #comment_text ').val())
+        console.log($(" #is_private ").val())
+        if ($(' #comment_text ').val().length) {
+            $.ajax({
+                url: "/",
+                type: 'POST',
+                data: ({
+                    type: 'new_comment_event',
+                    timestamp: $("#timestamp").val(),
+                    comment_text: $("#comment_text").val(),
+                    is_private: $("#is_private").val()
+                }),
+                datatype: 'text',
+                success: newCommentSuccess
+            })
+        }
+    })
+
+    let newCommentSuccess = function (data) {
+        comment = data['comment']
+        let text = `
+            <li class="list-group-item list-group-item-info">
+                <link rel="stylesheet" href="../../static/css/comment.css"/>
+                <div class="comment-wrapper" align="center">
+                    <div class="row">
+                        <div class="col-2" align="content">
+                            <img align="left" class="rounded-circle account-img" src="/static/img/profile_pics/${comment[0]}"/>
+                        </div>
+                        <div class="col-8" align="left">
+                            <div class="row field-group">
+                                <span style="float:left">
+                                    <h3><b>${comment[1]} ${comment[2]}</b></h3>
+                                </span>
+                            </div>
+                            <div class="row">
+                                <h6>@${comment[3]}</h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <p>${comment[4]}
+                        </p>
+                    </div>
+                    <div class="field-group">
+                        <span style="float:left">
+                            <label class="date"><em>Time related - ${comment[5]}</em></label>
+                        </span>
+                        <span style="float:right">
+                            <label class="date" ><em>Date created - ${comment[6]}</em></label>
+                        </span>
+                    </div>
+                </div>
+            </li>
+            <br>`
+        $(' #comments ').append(text);
+    }
+
+})

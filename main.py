@@ -280,7 +280,7 @@ def main():
             db_sess = db_session.create_session()
             comments = db_sess.query(Comments).filter_by(mat_file=filename).all()
 
-            comments_dict = {}
+            comments_list = []
             for i in range(len(comments)):
                 comment = comments[i]
                 profile_pic = comment.user.profile_pic
@@ -291,14 +291,14 @@ def main():
                 time_related = comment.time_related
                 date_created = comment.date_created
 
-                comments_dict[str(i)] = (profile_pic, name, surname, nickname, content, time_related, date_created)
+                comments_list.append((profile_pic, name, surname, nickname, content, time_related, date_created))
 
             heatmap_graph = Heatmap(1, [20000, 200000])
             keogram_graph = Keogram([20000, 200000])
 
             lightcurve_graph = Light_curve(UNIX_TIME_2)
             result = {'heatmap': heatmap_graph, 'keogram': keogram_graph, 'lightcurve': lightcurve_graph,
-                      'comments': comments_dict}
+                      'comments': tuple(comments_list)}
             return result
         elif request.values.get('type') == 'keogram_slider_event':
             values = [int(request.values.get('value0')), int(request.values.get('value1'))]
@@ -452,28 +452,27 @@ def main():
             fig = px.imshow(wavelet_2, x=local_UNIX_TIME_2)
             fig.show()
             return ''
-        elif request.values.get('type') is None:
+        elif request.values.get('type') == 'new_comment_event':
             db_sess = db_session.create_session()
             timestamp = request.values.get('timestamp')
             # 2022-02-03 17:46:12
-            comment = request.values.get('comment')
+            comment = request.values.get('comment_text')
             is_private = request.values.get('is_private')
-            if not timestamp:
-                return render_template('main.html', he=current_user, load=False, we_are_home=True,
-                                       message='Time field is empty. To fill it, tap to lightcurve')
-            if not comment:
-                return render_template('main.html', he=current_user, load=False, we_are_home=True,
-                                       message='Please enter a comment')
             if is_private:
                 is_private = True
             try:
-                structed_time = time.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
+                structed_time = ''
+                if timestamp:
+                    structed_time = time.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
             except ValueError:
                 structed_time = time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
-            real_timestamp = datetime.fromtimestamp(time.mktime(structed_time))
+            real_timestamp = ''
+            if structed_time:
+                real_timestamp = datetime.fromtimestamp(time.mktime(structed_time))
+            now = datetime.now()
             comment = Comments(
                 user_id=current_user.id,
-                date_created=datetime.now(),
+                date_created=now,
                 time_related=real_timestamp,
                 mat_file=filename,
                 content=comment,
@@ -487,7 +486,19 @@ def main():
             for comment in comments:
                 print(f"---> {comment.mat_file}")
             print(f"filename is {filename}")
-            return render_template('main.html', he=current_user, load=True, we_are_home=True, comments=comments)
+            comment = db_sess.query(Comments).filter_by(mat_file=filename, date_created=now).first()
+            profile_pic = comment.user.profile_pic
+            name = comment.user.name
+            surname = comment.user.surname
+            nickname = comment.user.nickname
+            content = comment.content
+            time_related = comment.time_related
+            date_created = comment.date_created
+            comment_data = (profile_pic, name, surname, nickname, content, time_related, date_created)
+
+            result = {'comment': comment_data}
+
+            return result
     return render_template('main.html', he=current_user, load=True, we_are_home=True)
 
 

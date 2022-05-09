@@ -290,8 +290,16 @@ def main():
                 content = comment.content
                 time_related = comment.time_related
                 date_created = comment.date_created
+                can_delete = 0
+                if current_user.is_authenticated and \
+                        (current_user.id == comment.user_id or current_user.is_admin):
+                    can_delete = 1
+                comm_id = comment.id
 
-                comments_list.append((profile_pic, name, surname, nickname, content, time_related, date_created))
+                if comment.is_private and comment.user_id != current_user.id:
+                    # не показывать
+                    continue
+                comments_list.append((profile_pic, name, surname, nickname, content, time_related, date_created, can_delete, comm_id))
 
             heatmap_graph = Heatmap(1, [20000, 200000])
             keogram_graph = Keogram([20000, 200000])
@@ -460,6 +468,8 @@ def main():
             is_private = request.values.get('is_private')
             if is_private:
                 is_private = True
+            else:
+                is_private = False
             try:
                 structed_time = ''
                 if timestamp:
@@ -470,14 +480,21 @@ def main():
             if structed_time:
                 real_timestamp = datetime.fromtimestamp(time.mktime(structed_time))
             now = datetime.now()
-            comment = Comments(
-                user_id=current_user.id,
-                date_created=now,
-                time_related=real_timestamp,
-                mat_file=filename,
-                content=comment,
-                is_private=is_private,
-            )
+            if not real_timestamp:
+                comment = Comments(
+                    user_id=current_user.id,
+                    date_created=now,
+                    mat_file=filename,
+                    content=comment,
+                    is_private=is_private,)
+            else:
+                comment = Comments(
+                    user_id=current_user.id,
+                    date_created=now,
+                    time_related=real_timestamp,
+                    mat_file=filename,
+                    content=comment,
+                    is_private=is_private,)
             db_sess.add(comment)
             db_sess.commit()
             db_sess = db_session.create_session()
@@ -499,6 +516,16 @@ def main():
             result = {'comment': comment_data}
 
             return result
+        elif request.values.get('type') == 'delete_comment':
+            print("Deleting now seriously!")
+            db_sess = db_session.create_session()
+            comment_id = request.values.get('id')
+            db_sess.query(Comments).filter(Comments.id == comment_id).delete()
+            db_sess.commit()
+
+            result = {'comm_id': comment_id}
+            return result
+
     return render_template('main.html', he=current_user, load=True, we_are_home=True)
 
 
@@ -547,12 +574,10 @@ def register():
         # info = user.info()
         # admins = db_sess.query(User).filter(User.is_admin).all()
         # admin_mails = [_.email for _ in admins]
-
-        return redirect('/login')
-
         # send_email(admin_mails, '[PGI] New user',
         #           plain_text=f'Зарегистрировался новый пользователь со следующими данными: {info}')
-        # return redirect('/login')
+        return redirect('/login')
+
     return render_template('register.html', title='Регистрация', form=form)
 
 
@@ -668,7 +693,7 @@ def user(nickname):
         return render_template('user/user.html', user=user_profile, he=current_user,
                                form=form, title='Redact profile')
 
-    if form.validate_on_submit():
+    if request.method == 'POST' or form.validate_on_submit():
         if form.picture.data:
             # Saving new image name to db
             new_image_path = save_picture(form.picture.data, previous_picture=user_profile.profile_pic)
@@ -714,6 +739,7 @@ def user(nickname):
         db_sess.commit()
         flash('Your account has been updated!', 'success')
         return redirect(f'/users/{form.nickname.data}')
+    flash("Nothing found", 'warning')
     return redirect(f"/users/{nickname}")
 
 

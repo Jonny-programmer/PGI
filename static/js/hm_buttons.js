@@ -111,10 +111,9 @@ window.firstSuccess = function (data) {
 
     console.log(comments);
 
-
     var format = function (str, col) {
         console.log(col)
-        let values = ['profile_pic', 'name', 'surname', 'nickname', 'content', 'time_related', 'date_created'];
+        let values = ['profile_pic', 'name', 'surname', 'nickname', 'content', 'time_related', 'date_created', 'can_delete', 'comm_id'];
         let i = 0
         values.forEach(function (value) {
             console.log('{{ ' + value + ' }}')
@@ -125,6 +124,7 @@ window.firstSuccess = function (data) {
     };
 
     comments.forEach(function (comment) {
+        let show_delete_button = `${comment[7]}`
         let text = `
             <li class="list-group-item list-group-item-info">
                 <link rel="stylesheet" href="../../static/css/comment.css"/>
@@ -136,7 +136,7 @@ window.firstSuccess = function (data) {
                         <div class="col-8" align="left">
                             <div class="row field-group">
                                 <span style="float:left">
-                                    <h3><b>${comment[1]} ${comment[2]}</b></h3>
+                                    <h3><b>${comment[1]} ${comment[2]}</b> <span id='comment_id' class="badge rounded-pill bg-primary">Comment #${comment[8]}</span></h3>
                                 </span>
                             </div>
                             <div class="row">
@@ -152,12 +152,21 @@ window.firstSuccess = function (data) {
                         <span style="float:left">
                             <label class="date"><em>Time related - ${comment[5]}</em></label>
                         </span>
-                        <span style="float:right">
+                        <br>
+                        <!-- Если хочешь нормально, убери <bt> и сделай float:right у второго-->
+                        <span style="float:left">
                             <label class="date" ><em>Date created - ${comment[6]}</em></label>
                         </span>
-                    </div>
-                </div>
-            </li>`
+                    </div>`
+        console.log('show_delete_button is ' + show_delete_button + ' (' + typeof show_delete_button + ')')
+        console.log('Test 1: int --> ' + show_delete_button === 0)
+        console.log('Test 2: str --> ' + show_delete_button === "0")
+        if (show_delete_button === "0") {
+            text = text + `</div></li><br>`
+        } else {
+            text = text + `<button id="delete_comment" align="right" class="btn btn-danger btn-rounded">Удалить</button></div></li><br>`
+        }
+
         $(' #comments ').append(text);
     })
 
@@ -248,7 +257,6 @@ $(document).ready(function () {
 
 window.is_heatmap_autoscale = false;
 
-
 $(document).ready(function () {
     $(" #form_submit ").bind("click", function () {
         console.log($("#timestamp").val())
@@ -270,8 +278,28 @@ $(document).ready(function () {
         }
     })
 
+    $("#delete_comment").bind("click", function () {
+        let comm_id = '#comment_id'
+        $.ajax({
+            context: this,
+            url: "/",
+            type: 'POST',
+            data: ({
+                type: 'delete_comment',
+                id: comm_id
+            }),
+            datatype: 'text',
+            success: function(data){
+                id = data['id']
+                console.log('Well, I have smth about comment number' + id + '(' + typeof id + '): it is deleted')
+                $(this).remove();
+            }
+        })
+    })
+
     let newCommentSuccess = function (data) {
         comment = data['comment']
+        let show_delete_button = `${comment[7]}`
         let text = `
             <li class="list-group-item list-group-item-info">
                 <link rel="stylesheet" href="../../static/css/comment.css"/>
@@ -283,7 +311,7 @@ $(document).ready(function () {
                         <div class="col-8" align="left">
                             <div class="row field-group">
                                 <span style="float:left">
-                                    <h3><b>${comment[1]} ${comment[2]}</b></h3>
+                                    <h3><b>${comment[1]} ${comment[2]}</b> <span id='comment_id' class="badge rounded-pill bg-primary">Comment #${comment[8]}</span></h3>
                                 </span>
                             </div>
                             <div class="row">
@@ -299,13 +327,19 @@ $(document).ready(function () {
                         <span style="float:left">
                             <label class="date"><em>Time related - ${comment[5]}</em></label>
                         </span>
-                        <span style="float:right">
-                            <label class="date" ><em>Date created - ${comment[6]}</em></label>
+                        <br>
+                        <!-- Если хочешь нормально, убери <bt> и сделай float:right у второго-->
+                        <span style="float:left">
+                           <label class="date" ><em>Date created - ${comment[6]}</em></label>
                         </span>
-                    </div>
-                </div>
-            </li>
-            <br>`
+                    </div>`
+
+        if (show_delete_button === "0") {
+            text = text + `</div></li><br>`
+        } else {
+            text = text + `<button id="delete_comment" align="right" class="btn btn-danger btn-rounded">Удалить</button></div></li><br>`
+        }
+
         $(' #comments ').append(text);
     }
 

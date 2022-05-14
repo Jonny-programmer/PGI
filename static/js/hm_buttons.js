@@ -153,7 +153,7 @@ window.firstSuccess = function (data) {
                             <label class="date"><em>Time related - ${comment[5]}</em></label>
                         </span>
                         <br>
-                        <!-- Если хочешь нормально, убери <bt> и сделай float:right у второго-->
+                        <!-- Если хочешь нормально, убери <br> и сделай float:right у второго-->
                         <span style="float:left">
                             <label class="date" ><em>Date created - ${comment[6]}</em></label>
                         </span>
@@ -164,7 +164,7 @@ window.firstSuccess = function (data) {
         if (show_delete_button === "0") {
             text = text + `</div></li><br>`
         } else {
-            text = text + `<button id="delete_comment" align="right" class="btn btn-danger btn-rounded">Удалить</button></div></li><br>`
+            text = text + `<button id=${comment[8]} align="right" class="btn btn-danger btn-rounded">Удалить</button></div></li><br>`
         }
 
         $(' #comments ').append(text);
@@ -278,20 +278,22 @@ $(document).ready(function () {
         }
     })
 
-    $("#delete_comment").bind("click", function () {
+    $("#1").bind("click", function () {
         let comm_id = '#comment_id'
         $.ajax({
             context: this,
             url: "/",
             type: 'POST',
             data: ({
-                type: 'delete_comment',
+                type:
+                'delete_comment',
                 id: comm_id
             }),
             datatype: 'text',
             success: function(data){
                 id = data['id']
                 console.log('Well, I have smth about comment number' + id + '(' + typeof id + '): it is deleted')
+                console.log(this)
                 $(this).remove();
             }
         })
@@ -337,7 +339,7 @@ $(document).ready(function () {
         if (show_delete_button === "0") {
             text = text + `</div></li><br>`
         } else {
-            text = text + `<button id="delete_comment" align="right" class="btn btn-danger btn-rounded">Удалить</button></div></li><br>`
+            text = text + `<button id=${comment[8]} align="right" class="btn btn-danger btn-rounded">Удалить</button></div></li><br>`
         }
 
         $(' #comments ').append(text);

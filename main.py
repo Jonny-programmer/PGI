@@ -759,6 +759,11 @@ def all_data_files():
                            title='All PGI files')
 
 
+@app.route('/about')
+def about():
+    return render_template('about.html', he=current_user, we_are_home=False)
+
+
 if __name__ == "__main__":
     app.run('0.0.0.0', port=5000, debug=True)
     # app.run('127.0.0.1', port=5000, debug=True)

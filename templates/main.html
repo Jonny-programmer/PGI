@@ -48,6 +48,7 @@
 {% endwith %}
 
 
+
 <div class="block lightcurve">
     <h1>Light Curve</h1>
 
@@ -85,8 +86,6 @@
                     $(document).ready(function () {
                         $("#autoscale_keogramm").bind("click",
                             function () {
-                                window.is_keogram_autoscale = true;
-
                                 $.ajax({
                                     url: "/",
                                     type: 'POST',
@@ -187,8 +186,7 @@
         })
     })
 
-    waveletSucces = function (data) {
-    }
+    waveletSucces = function(data){}
 
 </script>
 

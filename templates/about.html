@@ -1,0 +1,124 @@
+{% extends "NEW_BASE.html" %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/about.css') }}"/>
+
+<div class="block">
+    <div class="content-section">
+        <h1 style="align:center;">About us</h1>
+        <br>
+        <div class="content-section justify-content-center">
+            Этот сайт был создан для.......
+            <fieldset class="form-group">
+
+                <h2 style="align:center;">Научные руководители</h2>
+                <br>
+                <div class="media">
+                    <li class="list-group-item list-group-item-info">
+                        <div class="profile-wrapper" align="center">
+                            <div class="row">
+                                <div class="col-2" align="content">
+                                    <img align="left" class="rounded-circle account-img"  src="{{ url_for('static', filename='img/about_us_pics/belov.jpg') }}"/>
+                                </div>
+                                <div class="col-8" align="left">
+                                    <div class="row field-group">
+                                        <span style="float:left">
+                                            <h3><b>Белов Александр Андреевич</b></h3>
+                                        </span>
+                                    </div>
+                                    <div class="row">
+                                        <h6>aabcad@gmail.com</h6>
+                                    </div>
+                                    <div class="row">
+                                        +7(916)321-24-56
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </div>
+                <br>
+                <div class="media">
+                    <li class="list-group-item list-group-item-info">
+                        <div class="profile-wrapper" align="center">
+                            <div class="row">
+                                <div class="col-2" align="content">
+                                    <img align="left" class="rounded-circle account-img"  src="{{ url_for('static', filename='img/about_us_pics/klimov.jpg') }}"/>
+                                </div>
+                                <div class="col-8" align="left">
+                                    <div class="row field-group">
+                                        <span style="float:left">
+                                            <h3><b>Климов Павел Отчество</b></h3>
+                                        </span>
+                                    </div>
+                                    <div class="row">
+                                        <h6>?????</h6>
+                                    </div>
+                                    <div class="row">
+                                        +1(234)567-89-01
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </div>
+                <br>
+                <br>
+
+                <h2 style="align:center;">Разработчики</h2>
+                <br>
+                <div class="media">
+                    <li class="list-group-item list-group-item-info">
+                        <div class="profile-wrapper" align="center">
+                            <div class="row">
+                                <div class="col-2" align="content">
+                                    <img align="left" class="rounded-circle account-img"  src="{{ url_for('static', filename='img/about_us_pics/eremin.jpg') }}"/>
+                                </div>
+                                <div class="col-8" align="left">
+                                    <div class="row field-group">
+                                        <span style="float:left">
+                                            <h3><b>Еремин Иван Романович</b></h3>
+                                        </span>
+                                    </div>
+                                    <div class="row">
+                                        <h6>ioannis05@mail.ru</h6>
+                                    </div>
+                                    <div class="row">
+                                        +7(916)789-90-64
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </div>
+                <br>
+                <div class="media">
+                    <li class="list-group-item list-group-item-info">
+                        <div class="profile-wrapper" align="center">
+                            <div class="row">
+                                <div class="col-2" align="content">
+                                    <img align="left" class="rounded-circle account-img"  src="{{ url_for('static', filename='img/about_us_pics/emil.jpg') }}"/>
+                                </div>
+                                <div class="col-8" align="left">
+                                    <div class="row field-group">
+                                        <span style="float:left">
+                                            <h3><b>Эйбатов Эмиль Рауфович</b></h3>
+                                        </span>
+                                    </div>
+                                    <div class="row">
+                                        <h6>polstakanavodky@mail.ru</h6>
+                                    </div>
+                                    <div class="row">
+                                        +7(968)646-16-61
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </div>
+                <br>
+            </fieldset>
+        </div>
+    </div>
+</div>
+{% endblock %}

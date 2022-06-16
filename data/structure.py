@@ -67,7 +67,7 @@ class Comments(SqlAlchemyBase):
     user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
     date_created = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
-    time_related = sqlalchemy.Column(sqlalchemy.DateTime, nullable=False)
+    time_related = sqlalchemy.Column(sqlalchemy.DateTime)
     mat_file = sqlalchemy.Column(sqlalchemy.String, index=True)
     content = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     is_private = sqlalchemy.Column(sqlalchemy.Boolean, default=False)

@@ -19,7 +19,7 @@ pip install -r requirements.txt
 python3 main.py
 ```
 4) If you want to start the app normally, you need to create .env file (in root dir):
-```commandline
+```javascript
 HOST=smtp.yandex.ru
 PORT=465
 FROM=<your-email-address>@yandex.ru

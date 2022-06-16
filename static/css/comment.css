@@ -1,11 +1,11 @@
 .comment-wrapper {
     text-size: 10px;
-    margin: 0 auto !important;
-    max-width: 80%;
+    margin: 0 5px !important;
     border: 1px solid green;
     text-align: center;
     dislpay: grid;
     grid-template-columns: 60% 20% 20%;
+    padding: 0 10px
 }
 
 .date {

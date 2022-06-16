@@ -84,7 +84,7 @@ h2 {
 
 .files_list {
     margin: 10px;
-    grid-row: 3/8;
+    grid-row: 3/10;
     background-color: #0000 !important;
 }
 
@@ -223,8 +223,6 @@ textarea:after {
 }
 
 .form-wrapper {
-    display: grid;
-    grid-template-columns: 89% 9% 2%;
 }
 
 .form-group {
@@ -341,5 +339,9 @@ textarea:after {
 
 
 .list-group-item{
-    margin-bottom: 15px;
+    margin-top: 15px;
+}
+
+.row p{
+    word-break: break-all;
 }

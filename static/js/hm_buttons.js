@@ -37,73 +37,14 @@ window.firstSuccess = function (data) {
     Plotly.plot('keogram_graph', keogramm_graph, {});
     Plotly.plot('heatmap_graph', heatmap_graph, {});
 
-    let lightcurve_graph = JSON.parse(data['lightcurve']);
-    console.log(lightcurve_graph);
-    let btn_list = ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d']
-    Plotly.plot('lightcurve_graph', lightcurve_graph, {modeBarButtonsToRemove: ['toImage']});
-    // fixme: modeBarButtonsToRemove do not work
+    window.lightcurveSucces(data)
 
-
-    lightcurve = document.getElementById('lightcurve_graph')
-
-    lightcurve.on('plotly_click', function (data) {
-        let x = data.points[0].x;
-        try {
-            $('#timestamp').val(x);
-        } catch (TypeError) {
-            console.log('Okay, this happened again: x is now', typeof x)
-        }
-        ;
-        $.ajax({
-            url: "/",
-            type: 'POST',
-            data: ({
-                type: 'lightcurve_click_event',
-                x: x,
-                value0: window.value_heatmap0,
-                value1: window.value_heatmap1,
-                is_auto: window.is_heatmap_autoscale
-            }),
-            datatype: 'text',
-            success: window.funcSucces
-        })
-    })
-
-    lightcurve.on('plotly_relayout',
+    keogram = document.getElementById('keogram_graph')
+    keogram.on('plotly_relayout',
         function (eventdata) {
-            console.log(eventdata);
-            if (eventdata['xaxis.autorange']) {
-                $.ajax({
-                    url: "/",
-                    type: 'POST',
-                    data: ({
-                        type: 'lightcurve_all_graph_event'
-                    }),
-                    datatype: 'text',
-                    success: window.lightcurveSucces
-                });
-            } else {
-                x0 = eventdata['xaxis.range[0]'];
-                x1 = eventdata['xaxis.range[1]'];
-                y0 = eventdata['yaxis.range[0]'];
-                y1 = eventdata['yaxis.range[1]'];
-
-                $.ajax({
-                    url: "/",
-                    type: 'POST',
-                    data: ({
-                        type: 'lightcurve_change',
-                        x0: x0,
-                        x1: x1,
-                        y0: y0,
-                        y1: y1
-                    }),
-                    datatype: 'text',
-                    success: window.lightcurveSucces
-                });
-
-            }
+            console.log(eventdata)
         })
+
 
     $("#next").trigger('click');
 
@@ -166,8 +107,6 @@ window.firstSuccess = function (data) {
 
 
 window.lightcurveSucces = function (data) {
-    console.log(data);
-
     $("#lightcurve_graph").remove();
 
     $('<div>', {
@@ -176,13 +115,17 @@ window.lightcurveSucces = function (data) {
 
 
     let lightcurve_graph = JSON.parse(data['lightcurve']);
-    console.log(lightcurve_graph);
     Plotly.plot('lightcurve_graph', lightcurve_graph, {modeBarButtonsToRemove: ['toImage']});
 
     lightcurve = document.getElementById('lightcurve_graph')
 
     lightcurve.on('plotly_click', function (data) {
         let x = data.points[0].x;
+        try {
+            $('#timestamp').val(x);
+        } catch (TypeError) {
+            console.log('Okay, this happened again: x is now', typeof x)
+        };
         $.ajax({
             url: "/",
             type: 'POST',
@@ -247,6 +190,7 @@ $(document).ready(function () {
 })
 
 window.is_heatmap_autoscale = false;
+window.is_keogram_autoscale = false;
 
 
 $(document).ready(function () {
@@ -310,3 +254,62 @@ $(document).ready(function () {
     }
 
 })
+
+window.keogramSucces = function (data) {
+    $("#keogram_graph").remove();
+
+    $('<div>', {
+        id: 'keogram_graph'
+    }).appendTo("#keogram");
+
+
+    let keogram_graph = JSON.parse(data['keogram']);
+    Plotly.plot('keogram_graph', keogram_graph);
+
+    keogram = document.getElementById('keogram_graph')
+
+
+    keogram.on('plotly_relayout',
+        function (eventdata) {
+            console.log(eventdata);
+            if (eventdata['xaxis.autorange']) {
+                $.ajax({
+                    url: "/",
+                    type: 'POST',
+                    data: ({
+                        type: 'keogram_all_graph_event',
+                        value0: window.value_keogram0,
+                        value1: window.value_keogram1,
+                        is_auto: window.is_keogram_autoscale
+                    }),
+                    datatype: 'text',
+                    success: window.keogramSucces
+                });
+            } else {
+                x0 = eventdata['xaxis.range[0]'];
+                x1 = eventdata['xaxis.range[1]'];
+                y0 = eventdata['yaxis.range[0]'];
+                y1 = eventdata['yaxis.range[1]'];
+
+                $.ajax({
+                    url: "/",
+                    type: 'POST',
+                    data: ({
+                        type: 'keogram_change',
+                        value0: window.value_keogram0,
+                        value1: window.value_keogram1,
+                        is_auto: window.is_keogram_autoscale,
+                        x0: x0,
+                        x1: x1,
+                        y0: y0,
+                        y1: y1
+                    }),
+                    datatype: 'text',
+                    success: window.keogramSucces
+                });
+
+            }
+        })
+
+
+}

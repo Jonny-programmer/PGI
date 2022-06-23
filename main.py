@@ -308,23 +308,19 @@ def main():
             result = {'heatmap': heatmap_graph, 'keogram': keogram_graph, 'lightcurve': lightcurve_graph,
                       'comments': tuple(comments_list)}
             return result
-        elif request.values.get('type') == 'keogram_slider_event':
-            values = [int(request.values.get('value0')), int(request.values.get('value1'))]
-            graphJSON = Keogram(values)
-            return graphJSON
-        elif request.values.get('type') in ['heatmap_slider_event', 'heatmap_button_event', 'lightcurve_click_event']:
+        elif request.values.get('type') in ['heatmap_button_event', 'lightcurve_click_event']:
             current = 0
-            if request.values.get('type') in ['heatmap_button_event', 'heatmap_slider_event']:
+            if request.values.get('type') == 'heatmap_button_event':
                 current = int(request.values.get('current'))
-                if request.values.get('type') == 'heatmap_button_event':
-                    changes = {'play': 2, 'next': 1, 'next2': 10, 'next3': 1000, 'last': -1, 'last2': -10,
-                               'last3': -1000}
-                    if 0 <= current + changes[request.values.get('pos')] < max_hm:
-                        current += changes[request.values.get('pos')]
-                    elif current + changes[request.values.get('pos')] < 0:
-                        current = 0
-                    elif current + changes[request.values.get('pos')] >= max_hm:
-                        current = max_hm - 1
+
+                changes = {'play': 2, 'next': 1, 'next2': 10, 'next3': 1000, 'last': -1, 'last2': -10,
+                           'last3': -1000}
+                if 0 <= current + changes[request.values.get('pos')] < max_hm:
+                    current += changes[request.values.get('pos')]
+                elif current + changes[request.values.get('pos')] < 0:
+                    current = 0
+                elif current + changes[request.values.get('pos')] >= max_hm:
+                    current = max_hm - 1
             else:
                 x = request.values.get('x')
                 if len(x.split('.')) > 1:

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>PGI lab data</title>
 	<meta name="description" content="Data from UV telescope located in PGI observatory for the analysis of auroras">
 
@@ -17,6 +18,9 @@
     <script src="{{ url_for('static', filename='js/libs/plotly-latest.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/libs/ajax.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/libs/ui-slider.min.js') }}"></script>
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-plotly.js@2.2.0/dist/create-plotly-component.js"></script>
     <link rel="stylesheet" href="https://atuin.ru/demo/ui-slider/jquery-ui.css">
 
     <script src="{{ url_for('static', filename='js/libs/jquery.ui.touch-punch.min.js') }}"></script>
@@ -39,27 +43,25 @@
 <body>
     {% if load %}
         <script>
-        // $(document).ready(function() {
-        //     setInterval(function() {
-        //         let p = $(".preloader");
-        //         p.css('opacity', 0);
-        //
-        //         setInterval(() => p.remove(),
-        //             parseInt(p.css('--duration')) * 1000
-        //         );
-        //     }, 1000);
-        // });
+            window.onload = () => {
+                document.querySelector("#preloader").style.display = 'none';
+            }
+
+            setTimeout(() => {
+                document.querySelector("#preloader").style.display = 'none';
+            }, 10000)
+
         </script>
-<!--        <div class="preloader" id="preloader">-->
-<!--            <div class="preloader__content">-->
-<!--                <div class="preloader__first"></div>-->
-<!--                <div class="preloader__second"></div>-->
-<!--                <div class="preloader__third"></div>-->
-<!--            </div>-->
-<!--        </div>-->
+        <div class="preloader" id="preloader">
+            <div class="preloader__content">
+                <div class="preloader__first"></div>
+                <div class="preloader__second"></div>
+                <div class="preloader__third"></div>
+            </div>
+        </div>
     {% endif %}
     <div class="wrapper">
-        <div class="head">
+        <div class="head" autofocus>
             <div class="head-bar">
                <div class="user_settings" align="right">
                    <a href="/about" style="text-align: center;"><span style="font-weight:bold">About us</span></a>  |
@@ -80,8 +82,10 @@
             </div>
             <div class="center">
                 <a href="https://uhecr.sinp.msu.ru/ru/index.html" class="logo">
-                <img src="{{url_for('static', filename='img/logo.png')}}">
-                Лаборатория космических лучей<br> предельно высоких энергий НИИЯФ МГУ</a>
+                <img src="{{url_for('static', filename='img/logo.png')}}"></a>
+                <a href="https://uhecr.sinp.msu.ru/ru/index.html" class="logo-text">
+                    Лаборатория космических лучей<br> предельно высоких энергий НИИЯФ МГУ
+                </a>
             </div>
         </div>
         <center class="main_text"><h2>Данные с УФ-телескопа обсерватории ПГИ для исследования полярных сияний</h2></center>

@@ -49,19 +49,13 @@
 
 
 
-<div class="block lightcurve">
+<div class="block lightcurve-block">
     <h1>Light Curve</h1>
 
     <div class="personal_lightcurve_class">
-        <div>
-            <div id="lightcurve" class="lightcurve">
-                <div id="lightcurve_graph"></div>
-            </div>
-            <div id="hoverInfo"></div>
+        <div id="lightcurve" class="lightcurve">
+            <div id="lightcurve_graph"></div>
         </div>
-
-        <div></div>
-        <div></div>
     </div>
 </div>
 
@@ -69,104 +63,58 @@
     <h1>Keogramm</h1>
     <div class="something_and_slider">
         <div id="keogram" class="keogram">
-            <div id="keogram_graph">
-            </div>
+            <div id="keogram_graph"></div>
         </div>
-        <div>
-        </div>
-        <div>
+        <div class="slider">
             <div id="keogram_slider" class="ui-slider-vertical"></div>
-            <div id="first_keogram_text" class="slider_text">a</div>
-            <div id="second_keogram_text" class="slider_text">a</div>
-            <div class="autoscale_button" id="autoscale_keogramm">
-                <button class="autoscale btn btn-primary">Autoscale</button>
-                <script>
-
-
-                    $(document).ready(function () {
-                        $("#autoscale_keogramm").bind("click",
-                            function () {
-                                $.ajax({
-                                    url: "/",
-                                    type: 'POST',
-                                    data: ({
-                                        type: 'keogram_slider_event',
-                                        value0: 0,
-                                        value1: 0,
-                                    }),
-                                    datatype: 'text',
-                                    success: keogram_success
-                                })
-                            });
-                    })
-                </script>
-            </div>
         </div>
     </div>
+
+    <div class="autoscale_button" id="autoscale_keogramm">
+        <button class="autoscale btn btn-primary">Autoscale</button>
+    </div>
+
+    <div id="first_keogram_text" class="slider_text">a</div>
+    <div id="second_keogram_text" class="slider_text">a</div>
 
     <script type="text/javascript" src="{{ url_for('static', filename='js/keogramm_slider.js') }}"></script>
 </div>
 
 <div class="block">
     <h1>Frame</h1>
-    <div class="something_and_slider">
-        <div id="heatmaps">
-            <div id="heatmap_graph">
-            </div>
+    <div class="something_and_slider" id="something_and_slider_heatmap">
+        <div id="heatmap" class="heatmap">
+            <div id="heatmap_graph"></div>
         </div>
-        <div></div>
-        <div>
+        <div class="slider">
             <div id="heatmap_slider" class="ui-slider-vertical"></div>
-            <div id="first_heatmap_text" class="slider_text">a</div>
-            <div id="second_heatmap_text" class="slider_text">a</div>
-            <div class="autoscale_button" id="autoscale_heatmap">
-                <button class="autoscale1 btn btn-primary">Autoscale</button>
-                <script>
-
-                    $(document).ready(function () {
-                        $("#autoscale_heatmap").bind("click",
-                            function () {
-
-                                window.is_heatmap_autoscale = true;
-
-                                $.ajax({
-                                    url: "/",
-                                    type: 'POST',
-                                    data: ({
-                                        type: 'heatmap_slider_event',
-                                        value0: 0,
-                                        value1: 0,
-                                        current: window.current,
-                                        is_auto: window.is_heatmap_autoscale
-                                    }),
-                                    datatype: 'text',
-                                    success: window.funcSucces
-                                });
-                            });
-                    });
-
-                    window.current = 1;
-                </script>
-            </div>
         </div>
     </div>
 
     <script type="text/javascript" src="{{ url_for('static', filename='js/hm_slider.js') }}"></script>
 
-    <center>
-        <h5 class="header" id="text_id">Wait, please....</h5>
-        <div class="btn-group" role="group" aria-label="Basic example">
-            <button type="button" class="btn btn-primary" id="last3"><<<</button>
-            <button type="button" class="btn btn-primary" id="last2"><<</button>
-            <button type="button" class="btn btn-primary" id="last"><</button>
-            <div class="play">
-                <button type="button" class="btn btn-primary" id="play" title="Play">▶</button>
-            </div>
-            <button type="button" class="btn btn-primary" id="next"> ></button>
-            <button type="button" class="btn btn-primary" id="next2"> >></button>
-            <button type="button" class="btn btn-primary" id="next3"> >>></button>
+    <div class="buttons">
+        <div id="autoscale_heatmap" class="autoscale_button">
+            <button class="autoscale btn btn-primary">Autoscale</button>
         </div>
-    </center>
+        <div class="change-buttons">
+            <h5 class="header" id="text_id">Wait, please....</h5>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <button type="button" class="btn btn-primary" id="last3"><<<</button>
+                <button type="button" class="btn btn-primary" id="last2"><<</button>
+                <button type="button" class="btn btn-primary" id="last"><</button>
+                <div class="play">
+                    <button type="button" class="btn btn-primary" id="play" title="Play">▶</button>
+                </div>
+                <button type="button" class="btn btn-primary" id="next"> ></button>
+                <button type="button" class="btn btn-primary" id="next2"> >></button>
+                <button type="button" class="btn btn-primary" id="next3"> >>></button>
+            </div>
+        </div>
+
+    </div>
+    <div id="first_heatmap_text" class="slider_text">a</div>
+    <div id="second_heatmap_text" class="slider_text">a</div>
 </div>
 
 <div class="block">

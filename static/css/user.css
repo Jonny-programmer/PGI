@@ -1,26 +1,26 @@
 table {
-    display: flex;
-    justify-content: space-around;
-    align-content: center;
-    flex-direction: row;
+     display: flex;
+     justify-content: space-around;
+     align-content: center;
+     flex-direction: row;
 }
 
 fieldset {
-    margin: 0 auto;
-    max-width: 70%;
+     margin: 0 auto;
+     max-width: 70%;
 }
 
 .upload-container {
-    max-width:70%
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    outline: 2px dashed #5d5d5d;
-    outline-offset: -12px;
-    background-color: #e0f2f7;
-    font-family: 'Segoe UI';
-    color: #1f3c44;
+     max-width: 70%;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     flex-direction: column;
+     outline: 2px dashed #5d5d5d;
+     outline-offset: -12px;
+     background-color: #e0f2f7;
+     font-family: 'Segoe UI';
+     color: #1f3c44;
 }
 
 .upload-container img {

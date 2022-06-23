@@ -12,29 +12,32 @@ $("#heatmap_slider").slider({
     slide: function (event, ui) {
         window.change_pos(ui.values[0], " #first_heatmap_text ", " #heatmap_slider ");
         window.change_pos(ui.values[1], " #second_heatmap_text ", " #heatmap_slider ");
+        console.log(ui)
     }
 });
 
 $("#heatmap_slider").slider({
     stop: function (event, ui) {
-
-        window.is_heatmap_autoscale = false;
-
         window.value_heatmap0 = ui.values[0];
         window.value_heatmap1 = ui.values[1];
-        $.ajax({
-            url: "/",
-            type: 'POST',
-            data: ({
-                type: 'heatmap_slider_event',
-                value0: ui.values[0],
-                value1: ui.values[1],
-                current: window.current,
-                is_auto: window.is_heatmap_autoscale
-            }),
-            datatype: 'text',
-            success: window.funcSucces
-        })
+
+        heatmap = document.querySelector("#heatmap_graph>.js-plotly-plot");
+
+        let max = (ui.values[0] > ui.values[1]) ? ui.values[0] : ui.values[1];
+        let min = (ui.values[0] < ui.values[1]) ? ui.values[0] : ui.values[1];
+
+        if (ui.values[0] == ui.values[1]) {
+            min = 20000;
+            max = 200000;
+        }
+
+        let update = {
+            coloraxis: {
+                cmax: max,
+                cmin: min
+            }
+        }
+        console.log(Plotly.relayout(heatmap, update));
     }
 });
 $(document).ready(function () {

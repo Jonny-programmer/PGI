@@ -1,3 +1,32 @@
+function makeGraphPromise(div, graph, handlers={}){
+    let data = graph.data;
+    let layout = graph.layout;
+
+    console.log(`${div} data: `, data);
+    console.log(`${div} layout: `, layout);
+
+    let rend = ReactDOM.render(
+        React.createElement(createPlotlyComponent(Plotly), {
+            data: data,
+            layout: layout,
+            useResizeHandler: true,
+            style: {width: "100%", height: "100%"},
+            ...handlers
+        }),
+        document.getElementById(div)
+    );
+    // for (handlerKey of Object.keys(handlers)){
+    //     console.log(handlerKey);
+    //     rend.handlerKey = handlers[handlerKey];
+    // }
+    
+    console.log(div, " rend: ", rend);
+    return rend;
+}
+
+
+
+
 return_button_func = function (name) {
     return function () {
         $.ajax({
@@ -23,28 +52,23 @@ window.funcSucces = function (data) {
     $("#heatmap_graph").remove();
     $('<div>', {
         id: 'heatmap_graph'
-    }).appendTo("#heatmaps")
+    }).appendTo("#heatmap")
     let graphs = JSON.parse(data['heatmap']);
-    Plotly.plot('heatmap_graph', graphs, {});
+    makeGraphPromise('heatmap_graph', graphs);
 }
 
 window.firstSuccess = function (data) {
-
-    $( ".list-group-item" ).remove();
+    console.log("seegsergserg")
+    $(".list-group-item").remove();
 
     let heatmap_graph = JSON.parse(data['heatmap']);
     let keogramm_graph = JSON.parse(data['keogram']);
-    Plotly.plot('keogram_graph', keogramm_graph, {});
-    Plotly.plot('heatmap_graph', heatmap_graph, {});
+
+
+    makeGraphPromise('keogram_graph', keogramm_graph)
+    makeGraphPromise('heatmap_graph', heatmap_graph)
 
     window.lightcurveSucces(data)
-
-    keogram = document.getElementById('keogram_graph')
-    keogram.on('plotly_relayout',
-        function (eventdata) {
-            console.log(eventdata)
-        })
-
 
     $("#next").trigger('click');
 
@@ -124,17 +148,26 @@ window.lightcurveSucces = function (data) {
 
 
     let lightcurve_graph = JSON.parse(data['lightcurve']);
-    Plotly.plot('lightcurve_graph', lightcurve_graph, {modeBarButtonsToRemove: ['toImage']});
 
-    lightcurve = document.getElementById('lightcurve_graph')
+    
+    // let rend = ReactDOM.render(
+    //     React.createElement(createPlotlyComponent(Plotly), {
+    //         data: lightcurve_data,
+    //         layout: lightcurve_layout,
+    //         useResizeHandler: true,
+    //         style: {width: "100%", height: "100%"}
+    //     }),
+    //     document.getElementById('lightcurve_graph')
+    // );
 
-    lightcurve.on('plotly_click', function (data) {
+    let plotlyClick = function (data) {
         let x = data.points[0].x;
         try {
             $('#timestamp').val(x);
         } catch (TypeError) {
             console.log('Okay, this happened again: x is now', typeof x)
-        };
+        }
+        ;
         $.ajax({
             url: "/",
             type: 'POST',
@@ -148,44 +181,49 @@ window.lightcurveSucces = function (data) {
             datatype: 'text',
             success: window.funcSucces
         })
-    })
+    }
 
-    lightcurve.on('plotly_relayout',
-        function (eventdata) {
-            console.log(eventdata);
-            if (eventdata['xaxis.autorange']) {
-                $.ajax({
-                    url: "/",
-                    type: 'POST',
-                    data: ({
-                        type: 'lightcurve_all_graph_event'
-                    }),
-                    datatype: 'text',
-                    success: window.lightcurveSucces
-                });
-            } else {
-                x0 = eventdata['xaxis.range[0]'];
-                x1 = eventdata['xaxis.range[1]'];
-                y0 = eventdata['yaxis.range[0]'];
-                y1 = eventdata['yaxis.range[1]'];
+    let relayout = function (eventdata) {
+        console.log(eventdata);
+        if (eventdata['xaxis.autorange']) {
+            $.ajax({
+                url: "/",
+                type: 'POST',
+                data: ({
+                    type: 'lightcurve_all_graph_event'
+                }),
+                datatype: 'text',
+                success: window.lightcurveSucces
+            });
+        } else {
+            x0 = eventdata['xaxis.range[0]'];
+            x1 = eventdata['xaxis.range[1]'];
+            y0 = eventdata['yaxis.range[0]'];
+            y1 = eventdata['yaxis.range[1]'];
 
-                $.ajax({
-                    url: "/",
-                    type: 'POST',
-                    data: ({
-                        type: 'lightcurve_change',
-                        x0: x0,
-                        x1: x1,
-                        y0: y0,
-                        y1: y1
-                    }),
-                    datatype: 'text',
-                    success: window.lightcurveSucces
-                });
+            $.ajax({
+                url: "/",
+                type: 'POST',
+                data: ({
+                    type: 'lightcurve_change',
+                    x0: x0,
+                    x1: x1,
+                    y0: y0,
+                    y1: y1
+                }),
+                datatype: 'text',
+                success: window.lightcurveSucces
+            });
 
-            }
-        })
+        }
+    }
 
+    let handlers = {
+        onClick: plotlyClick,
+        onRelayout: relayout
+    }
+
+    makeGraphPromise('lightcurve_graph', lightcurve_graph, handlers);
 
 }
 
@@ -230,11 +268,11 @@ $(document).ready(function () {
             type: 'POST',
             data: ({
                 type:
-                'delete_comment',
+                    'delete_comment',
                 id: comm_id
             }),
             datatype: 'text',
-            success: function(data){
+            success: function (data) {
                 id = data['id']
                 console.log('Well, I have smth about comment number' + id + '(' + typeof id + '): it is deleted')
                 console.log(this)
@@ -300,52 +338,9 @@ window.keogramSucces = function (data) {
 
 
     let keogram_graph = JSON.parse(data['keogram']);
-    Plotly.plot('keogram_graph', keogram_graph);
 
-    keogram = document.getElementById('keogram_graph')
+    makeGraphPromise('keogram_graph', keogram_graph)
 
-
-    keogram.on('plotly_relayout',
-        function (eventdata) {
-            console.log(eventdata);
-            if (eventdata['xaxis.autorange']) {
-                $.ajax({
-                    url: "/",
-                    type: 'POST',
-                    data: ({
-                        type: 'keogram_all_graph_event',
-                        value0: window.value_keogram0,
-                        value1: window.value_keogram1,
-                        is_auto: window.is_keogram_autoscale
-                    }),
-                    datatype: 'text',
-                    success: window.keogramSucces
-                });
-            } else {
-                x0 = eventdata['xaxis.range[0]'];
-                x1 = eventdata['xaxis.range[1]'];
-                y0 = eventdata['yaxis.range[0]'];
-                y1 = eventdata['yaxis.range[1]'];
-
-                $.ajax({
-                    url: "/",
-                    type: 'POST',
-                    data: ({
-                        type: 'keogram_change',
-                        value0: window.value_keogram0,
-                        value1: window.value_keogram1,
-                        is_auto: window.is_keogram_autoscale,
-                        x0: x0,
-                        x1: x1,
-                        y0: y0,
-                        y1: y1
-                    }),
-                    datatype: 'text',
-                    success: window.keogramSucces
-                });
-
-            }
-        })
 
 
 }

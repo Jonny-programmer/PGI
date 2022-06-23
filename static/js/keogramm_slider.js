@@ -1,3 +1,36 @@
+$(document).ready(function () {
+    $("#autoscale_keogramm").bind("click",
+        function () {
+
+            keogram = document.getElementById("keogram_graph").querySelector(".js-plotly-plot");
+
+            let update = {
+                coloraxis: {
+                    cmax: 0,
+                    cmin: 0
+                }
+            }
+
+            console.log(Plotly.relayout(keogram, update));
+        });
+
+    $("#autoscale_heatmap").bind("click", () => {
+        window.is_heatmap_autoscale = true;
+        let heatmap = document.querySelector("#heatmap_graph>.js-plotly-plot");
+
+        let update = {
+            coloraxis: {
+                cmax: 0,
+                cmin: 0
+            }
+        }
+
+        console.log(Plotly.relayout(heatmap, update));
+    });
+
+});
+
+
 $(".ui-slider-vertical").slider({
     animate: 100,
     range: "min",
@@ -19,7 +52,7 @@ window.change_pos = function (value, id1, id2) {
     $(id1).text(value / 1000 + 'K');
     value_left = text_position(value, id2)[0] + $(id2).position().left
     value_top = text_position(value, id2)[1] + $(id2).position().top - $(id1).height() / 2
-    $(id1).offset({top: value_top, left: value_left});
+    $(id1).offset({ top: value_top, left: value_left });
 }
 
 keogram_success = function (data) {
@@ -28,7 +61,7 @@ keogram_success = function (data) {
         id: 'keogram_graph'
     }).appendTo("#keogram")
     let graphs = JSON.parse(data);
-    Plotly.plot('keogram_graph', graphs, {});
+    makeGraphPromise('keogram_graph', graphs)
 }
 
 
@@ -41,20 +74,27 @@ $("#keogram_slider").slider({
 
 $("#keogram_slider").slider({
     stop: function (event, ui) {
-        window.is_keogram_autoscale = false;
         window.value_keogram0 = ui.values[0];
         window.value_keogram1 = ui.values[1];
-        $.ajax({
-            url: "/",
-            type: 'POST',
-            data: ({
-                type: 'keogram_slider_event',
-                value0: ui.values[0],
-                value1: ui.values[1],
-            }),
-            datatype: 'text',
-            success: keogram_success
-        })
+
+        keogram = document.querySelector("#keogram_graph>.js-plotly-plot");
+
+        let max = (ui.values[0] > ui.values[1]) ? ui.values[0] : ui.values[1];
+        let min = (ui.values[0] < ui.values[1]) ? ui.values[0] : ui.values[1];
+
+        if (ui.values[0] == ui.values[1]) {
+            min = 20000;
+            max = 200000;
+        }
+
+        let update = {
+            coloraxis: {
+                cmax: max,
+                cmin: min
+            }
+        }
+        console.log(Plotly.relayout(keogram, update));
+
     }
 });
 

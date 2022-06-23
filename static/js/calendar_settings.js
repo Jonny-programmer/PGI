@@ -124,7 +124,7 @@ function dateSuccess(data) {
 
     $('<div>', {
         id: 'heatmap_graph'
-    }).appendTo("#heatmaps");
+    }).appendTo("#heatmap");
 
     $('<div>', {
         id: 'keogram_graph'

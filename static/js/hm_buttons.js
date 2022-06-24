@@ -344,3 +344,10 @@ window.keogramSucces = function (data) {
 
 
 }
+
+window.addEventListener("resize", (event) => {
+    window.change_pos(window.value_heatmap0, " #first_heatmap_text ", " #heatmap_slider ");
+    window.change_pos(window.value_heatmap1, " #second_heatmap_text ", " #heatmap_slider ");
+    window.change_pos(window.value_keogram0, " #first_keogram_text ", " #keogram_slider ");
+    window.change_pos(window.value_keogram1, " #second_keogram_text ", " #keogram_slider ");
+}, true);

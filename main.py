@@ -292,13 +292,13 @@ def main():
                 date_created = comment.date_created
                 can_delete = 0
                 if current_user.is_authenticated and \
-                        (current_user.id == comment.user_id or current_user.is_admin):
+                        (current_user.id == comment.user.id or current_user.is_admin):
                     can_delete = 1
                 comm_id = comment.id
 
-                if comment.is_private and comment.user_id != current_user.id:
-                    # не показывать
-                    continue
+                if not current_user.is_authenticated:
+                    if comment.is_private:
+                        continue
                 comments_list.append((profile_pic, name, surname, nickname, content, time_related, date_created, can_delete, comm_id))
 
             heatmap_graph = Heatmap(1, [20000, 200000])
@@ -392,12 +392,18 @@ def main():
 
             return {'data': tuple(date_list)}
         elif request.values.get('type') == 'lightcurve_change':
-            x0 = 'T'.join(request.values.get('x0').split())
-            x1 = 'T'.join(request.values.get('x1').split())
-            y0 = float(request.values.get('y0'))
-            y1 = float(request.values.get('y1'))
+            try:
+                x0 = 'T'.join(request.values.get('x0').split())
+                x1 = 'T'.join(request.values.get('x1').split())
+                y0 = float(request.values.get('y0'))
+                y1 = float(request.values.get('y1'))
+            except AttributeError:
+                x0 = None
+                x1 = None
+                y0 = None
+                y1 = None
 
-            if not (x0 and x1 and y0 and x1):
+            if not (x0 and x1 and y0 and y1):
                 return ''
 
             print(x0, x1, y0, y1)
@@ -761,8 +767,8 @@ def about():
 
 
 if __name__ == "__main__":
-    app.run('0.0.0.0', port=5001, debug=True)
-    # app.run('127.0.0.1', port=5000, debug=True)
+    # app.run('0.0.0.0', port=5001, debug=True)
+    app.run('127.0.0.1', port=5000, debug=True)
     # serve(app, host='0.0.0.0', port=5000)
     if server:
         server.quit()

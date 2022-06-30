@@ -287,7 +287,7 @@ def main():
                 name = comment.user.name
                 surname = comment.user.surname
                 nickname = comment.user.nickname
-                content = comment.content
+                content = comment.content.replace("<", "&lt;").replace(">", "&gt;")
                 time_related = comment.time_related
                 date_created = comment.date_created
                 can_delete = 0
@@ -487,7 +487,7 @@ def main():
                     user_id=current_user.id,
                     date_created=now,
                     mat_file=filename,
-                    content=comment,
+                    content=comment.replace("<", "&lt;").replace(">", "&gt;"),
                     is_private=is_private,)
             else:
                 comment = Comments(
@@ -495,7 +495,7 @@ def main():
                     date_created=now,
                     time_related=real_timestamp,
                     mat_file=filename,
-                    content=comment,
+                    content=comment.replace("<", "&lt;").replace(">", "&gt;"),
                     is_private=is_private,)
             db_sess.add(comment)
             db_sess.commit()

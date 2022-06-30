@@ -187,6 +187,7 @@ button:hover:before {
         min-width: 768px;
     }
 }
+
 @media (max-width: 767px) {
     .inner {
         min-width: auto;

@@ -1,7 +1,7 @@
 * {
     margin: auto 0;
     padding: 0;
-    font-size: 1.5vh;
+    font-size: 2vh;
 }
 
 html,
@@ -26,7 +26,7 @@ body {
 .logo-text {
     position: absolute;
     left: 4vh;
-    top: 12vh;
+    top: 10vh;
     padding: 0 0 0 25vh;
     color: #fff;
     text-decoration: none;
@@ -56,7 +56,7 @@ h1 {
     right: 0;
     background: url(../img/head-png.png);
     background-size: cover;
-    height: auto;
+    height: 37px;
 }
 
 .head {
@@ -164,7 +164,7 @@ a {
 
 .lightcurve-block {
     position: relative;
-    margin-top: 25px;
+    margin-top: 10px;
     height: -webkit-fill-available;
 }
 
